@@ -1,0 +1,103 @@
+{
+  "brand": {
+    "name": "ManualMind",
+    "tagline": "Knowledge, made useful."
+  },
+  "nav": {
+    "assistants": "Assistants",
+    "knowledgeBase": "Knowledge Base",
+    "newChat": "New Chat",
+    "chats": "Chats",
+    "noChats": "No chats yet"
+  },
+  "user": {
+    "account": "Your account",
+    "language": "Language",
+    "appearance": "Appearance",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode",
+    "signOut": "Sign out"
+  },
+  "assistants": {
+    "eyebrow": "Your workspace",
+    "title": "Your assistants",
+    "intro": "Create focused AI assistants grounded in your company documents. Each assistant has its own knowledge base and conversation history.",
+    "searchPlaceholder": "Search assistants...",
+    "createButton": "Create assistant",
+    "noMatch": "No assistants match your search.",
+    "emptyState": "You don't have any assistants yet.",
+    "emptyStateAction": "Create your first assistant to get started.",
+    "ready": "Ready",
+    "setupNeeded": "Setup needed",
+    "documentsCount": "{{count}} documents",
+    "oneDocument": "1 document"
+  },
+  "createModal": {
+    "title": "Create an assistant",
+    "subtitle": "Give your assistant a name and connect your model provider.",
+    "nameLabel": "Assistant name",
+    "namePlaceholder": "e.g. People Operations",
+    "slugLabel": "URL identifier",
+    "slugPlaceholder": "e.g. people-operations",
+    "slugHelp": "Used in the assistant’s URL. Use lowercase letters, numbers, and hyphens.",
+    "keyLabel": "OpenRouter API key",
+    "keyPlaceholder": "sk-or-...",
+    "keyHelp": "Your key is encrypted on the server and never exposed in the browser.",
+    "show": "Show",
+    "hide": "Hide",
+    "cancel": "Cancel",
+    "submit": "Create assistant",
+    "submitting": "Creating..."
+  },
+  "knowledge": {
+    "eyebrow": "Knowledge base",
+    "intro": "Manage the documents this assistant can use to answer questions. Only content in this knowledge base can support its answers.",
+    "addDocs": "Add documents",
+    "tabDocuments": "Documents",
+    "tabProcessing": "Processing",
+    "tabSettings": "Settings",
+    "totalDocs": "Total documents",
+    "indexedDocs": "Successfully indexed",
+    "status": "Knowledge base status",
+    "ready": "Ready to use",
+    "uploadTitle": "Upload company documents",
+    "uploadSubtitle": "PDF, DOCX or TXT · Add the approved information this assistant should rely on.",
+    "chooseFiles": "Choose files",
+    "searchDocs": "Search documents...",
+    "noDocs": "No documents found.",
+    "removeConfirm": "Remove \"{{name}}\" from this knowledge base?",
+    "reprocess": "Reprocess document",
+    "replace": "Replace with new version",
+    "delete": "Delete document",
+    "version": "v{{version}}",
+    "statusIndexed": "Indexed",
+    "statusProcessing": "Processing",
+    "statusFailed": "Failed"
+  },
+  "chat": {
+    "groundedNotice": "Answers grounded in its knowledge base",
+    "knowledgeButton": "Knowledge base",
+    "welcomeTitle": "What would you like to know?",
+    "welcomeSubtitle": "Ask a question about your company documents. Answers should include sources so you can verify the information.",
+    "suggestion1": "How many vacation days do employees get?",
+    "suggestion1Sub": "Employee policies",
+    "suggestion2": "What should a new hire do on day one?",
+    "suggestion2Sub": "Onboarding",
+    "suggestion3": "How do I enroll in health benefits?",
+    "suggestion3Sub": "Benefits",
+    "suggestion4": "What is the remote work policy?",
+    "suggestion4Sub": "Workplace guidelines",
+    "placeholder": "Ask {{assistant}} a question...",
+    "disclaimer": "ManualMind can make mistakes. Check the cited source before relying on an answer.",
+    "citationsTitle": "Sources & Citations",
+    "eventsTitle": "Execution trace (LangGraph)",
+    "sending": "Generating answer..."
+  },
+  "auth": {
+    "signInTitle": "Welcome to ManualMind",
+    "signInSubtitle": "Private AI assistants grounded in your verified documents.",
+    "googleButton": "Continue with Google",
+    "signingIn": "Redirecting to Google...",
+    "tagline": "Enterprise-grade RAG with real citations and zero hallucination tolerance."
+  }
+}

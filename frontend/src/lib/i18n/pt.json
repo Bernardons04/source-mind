@@ -1,0 +1,103 @@
+{
+  "brand": {
+    "name": "ManualMind",
+    "tagline": "Conhecimento que faz sentido."
+  },
+  "nav": {
+    "assistants": "Assistentes",
+    "knowledgeBase": "Base de Conhecimento",
+    "newChat": "Nova Conversa",
+    "chats": "Conversas",
+    "noChats": "Nenhuma conversa ainda"
+  },
+  "user": {
+    "account": "Sua conta",
+    "language": "Idioma",
+    "appearance": "Aparência",
+    "darkMode": "Modo escuro",
+    "lightMode": "Modo claro",
+    "signOut": "Sair"
+  },
+  "assistants": {
+    "eyebrow": "Seu espaço de trabalho",
+    "title": "Seus assistentes",
+    "intro": "Crie assistentes de IA especializados fundamentados nos documentos da sua empresa. Cada assistente possui sua própria base de conhecimento e histórico de conversas.",
+    "searchPlaceholder": "Buscar assistentes...",
+    "createButton": "Criar assistente",
+    "noMatch": "Nenhum assistente corresponde à sua busca.",
+    "emptyState": "Você ainda não possui assistentes.",
+    "emptyStateAction": "Crie seu primeiro assistente para começar.",
+    "ready": "Pronto",
+    "setupNeeded": "Configuração pendente",
+    "documentsCount": "{{count}} documentos",
+    "oneDocument": "1 documento"
+  },
+  "createModal": {
+    "title": "Criar um assistente",
+    "subtitle": "Dê um nome ao assistente e conecte seu provedor de modelos.",
+    "nameLabel": "Nome do assistente",
+    "namePlaceholder": "ex: Recursos Humanos",
+    "slugLabel": "Identificador da URL",
+    "slugPlaceholder": "ex: recursos-humanos",
+    "slugHelp": "Utilizado no endereço do assistente. Letras minúsculas, números e hífens.",
+    "keyLabel": "Chave da API OpenRouter",
+    "keyPlaceholder": "sk-or-...",
+    "keyHelp": "Sua chave é criptografada no servidor e nunca exposta no navegador.",
+    "show": "Mostrar",
+    "hide": "Ocultar",
+    "cancel": "Cancelar",
+    "submit": "Criar assistente",
+    "submitting": "Criando..."
+  },
+  "knowledge": {
+    "eyebrow": "Base de conhecimento",
+    "intro": "Gerencie os documentos que este assistente pode utilizar para responder perguntas. Apenas o conteúdo desta base apoiará suas respostas.",
+    "addDocs": "Adicionar documentos",
+    "tabDocuments": "Documentos",
+    "tabProcessing": "Processamento",
+    "tabSettings": "Configurações",
+    "totalDocs": "Total de documentos",
+    "indexedDocs": "Indexados com sucesso",
+    "status": "Status da base",
+    "ready": "Pronto para uso",
+    "uploadTitle": "Enviar documentos da empresa",
+    "uploadSubtitle": "PDF, DOCX ou TXT · Adicione informações aprovadas para este assistente.",
+    "chooseFiles": "Escolher arquivos",
+    "searchDocs": "Buscar documentos...",
+    "noDocs": "Nenhum documento encontrado.",
+    "removeConfirm": "Remover \"{{name}}\" desta base de conhecimento?",
+    "reprocess": "Reprocessar documento",
+    "replace": "Substituir por nova versão",
+    "delete": "Excluir documento",
+    "version": "v{{version}}",
+    "statusIndexed": "Indexado",
+    "statusProcessing": "Processando",
+    "statusFailed": "Falhou"
+  },
+  "chat": {
+    "groundedNotice": "Respostas fundamentadas em sua base de conhecimento",
+    "knowledgeButton": "Base de conhecimento",
+    "welcomeTitle": "O que você gostaria de saber?",
+    "welcomeSubtitle": "Faça uma pergunta sobre seus documentos. As respostas incluirão fontes para você verificar as informações.",
+    "suggestion1": "Quantos dias de férias os colaboradores têm direito?",
+    "suggestion1Sub": "Políticas internas",
+    "suggestion2": "O que um novo colaborador deve fazer no primeiro dia?",
+    "suggestion2Sub": "Integração (Onboarding)",
+    "suggestion3": "Como aderir ao plano de saúde?",
+    "suggestion3Sub": "Benefícios",
+    "suggestion4": "Qual é a política de trabalho remoto?",
+    "suggestion4Sub": "Diretrizes de trabalho",
+    "placeholder": "Faça uma pergunta para {{assistant}}...",
+    "disclaimer": "O ManualMind pode cometer erros. Verifique a fonte citada antes de tomar decisões.",
+    "citationsTitle": "Fontes e Citações",
+    "eventsTitle": "Rastreamento da execução (LangGraph)",
+    "sending": "Gerando resposta..."
+  },
+  "auth": {
+    "signInTitle": "Bem-vindo ao ManualMind",
+    "signInSubtitle": "Assistentes de IA privados fundamentados em seus documentos verificados.",
+    "googleButton": "Continuar com o Google",
+    "signingIn": "Redirecionando para o Google...",
+    "tagline": "RAG de alta confiabilidade com citações reais e tolerância zero a alucinações."
+  }
+}
