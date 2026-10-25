@@ -38,7 +38,9 @@ DATABASE_URL=postgresql+asyncpg://postgres:YOUR_DB_PASSWORD@db.YOUR_PROJECT_REF.
 # Supabase Auth & Storage configuration
 SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
 SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
-SUPABASE_JWT_SECRET=YOUR_SUPABASE_JWT_SECRET
+# Tokens are verified via public JWKS ({SUPABASE_URL}/auth/v1/.well-known/jwks.json).
+# SUPABASE_JWT_SECRET is optional and only needed for legacy projects using symmetric HS256 tokens.
+# SUPABASE_JWT_SECRET=optional_legacy_only
 SUPABASE_STORAGE_BUCKET=documents
 
 # Symmetric encryption key for OpenRouter API keys (Fernet base64 32-byte key)

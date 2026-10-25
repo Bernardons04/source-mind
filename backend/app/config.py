@@ -7,7 +7,8 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
     SUPABASE_URL: str = "https://example.supabase.co"
     SUPABASE_ANON_KEY: str = "anon-key-placeholder"
-    SUPABASE_JWT_SECRET: str = "jwt-secret-placeholder"
+    # Optional legacy fallback: modern Supabase projects validate via public JWKS automatically
+    SUPABASE_JWT_SECRET: str | None = None
     SUPABASE_STORAGE_BUCKET: str = "documents"
     ENCRYPTION_KEY: str = "0123456789abcdef0123456789abcdef0123456789a="
     BACKEND_HOST: str = "0.0.0.0"
