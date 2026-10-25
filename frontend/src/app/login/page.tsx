@@ -11,6 +11,15 @@ export default function LoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const errorParam = new URLSearchParams(window.location.search).get("error");
+      if (errorParam) {
+        showToast(`Login notice: ${errorParam}`);
+      }
+    }
+  }, [showToast]);
+
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
