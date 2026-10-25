@@ -50,6 +50,8 @@ def verify_supabase_jwt(token: str) -> AuthenticatedUser:
 
         payload: dict
 
+        leeway = max(0, settings.JWT_LEEWAY_SECONDS)
+
         if alg in ("RS256", "ES256", "EdDSA", "ES384", "ES512", "RS384", "RS512"):
             # Asymmetric verification via Supabase JWKS public keys
             jwks = get_jwks_client()
@@ -59,6 +61,7 @@ def verify_supabase_jwt(token: str) -> AuthenticatedUser:
                 signing_key.key,
                 algorithms=[alg],
                 audience="authenticated",
+                leeway=leeway,
             )
         elif alg == "HS256":
             # Symmetric verification fallback for legacy projects with shared secret
@@ -74,6 +77,7 @@ def verify_supabase_jwt(token: str) -> AuthenticatedUser:
                 secret,
                 algorithms=["HS256"],
                 audience="authenticated",
+                leeway=leeway,
             )
         else:
             raise HTTPException(
@@ -102,6 +106,12 @@ def verify_supabase_jwt(token: str) -> AuthenticatedUser:
             token=clean_token,
         )
 
+    except jwt.ImmatureSignatureError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Token not yet valid (clock skew exceeded {settings.JWT_LEEWAY_SECONDS}s tolerance): {str(e)}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

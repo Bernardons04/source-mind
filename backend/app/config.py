@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
     DEFAULT_EMBEDDING_MODEL: str = "openai/text-embedding-3-small"
     DEFAULT_CHAT_MODEL: str = "openai/gpt-4o-mini"
+    # Clock skew tolerance (in seconds) for iat/nbf/exp verification
+    JWT_LEEWAY_SECONDS: int = 60
 
     model_config = SettingsConfigDict(
         env_file=(".env", "../.env"),
