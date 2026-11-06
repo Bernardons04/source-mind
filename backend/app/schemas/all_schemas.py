@@ -25,6 +25,7 @@ class AssistantResponse(BaseModel):
     instructions: Dict[str, Any]
     has_api_key: bool
     document_count: int = 0
+    deletion_status: str = "active"
     created_at: datetime
     updated_at: datetime
 
@@ -34,24 +35,13 @@ class DocumentResponse(BaseModel):
     id: uuid.UUID
     assistant_id: uuid.UUID
     name: str
-    current_version_number: int
+    upload_status: str
     file_size: int
     mime_type: str
     processing_status: str
     processing_error: Optional[str] = None
     created_at: datetime
     updated_at: datetime
-
-
-class DocumentVersionResponse(BaseModel):
-    id: uuid.UUID
-    document_id: uuid.UUID
-    version_number: int
-    file_size: int
-    mime_type: str
-    processing_status: str
-    processing_error: Optional[str] = None
-    created_at: datetime
 
 
 # --- Chats & Messages ---
@@ -84,7 +74,7 @@ class MessageEventResponse(BaseModel):
     id: uuid.UUID
     sequence_number: int
     event_type: str
-    payload: Dict[str, Any] = Field(default_factory=dict)
+    payload: Dict[str, Any]
     created_at: datetime
 
 
@@ -93,15 +83,15 @@ class MessageResponse(BaseModel):
     chat_id: uuid.UUID
     role: str
     content: str
-    created_at: datetime
     citations: List[MessageCitationResponse] = Field(default_factory=list)
     events: List[MessageEventResponse] = Field(default_factory=list)
+    created_at: datetime
 
 
-# --- Preferences ---
+# --- User Preferences ---
 class UserPreferenceUpdate(BaseModel):
-    language: Optional[str] = Field(None, pattern=r"^(en|pt|es)$")
-    theme: Optional[str] = Field(None, pattern=r"^(dark|light)$")
+    language: Optional[str] = Field(None, max_length=10)
+    theme: Optional[str] = Field(None, max_length=20)
 
 
 class UserPreferenceResponse(BaseModel):

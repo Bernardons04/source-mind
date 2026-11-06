@@ -7,8 +7,8 @@ from app.database import engine
 REQUIRED_TABLES = [
     "assistants",
     "documents",
-    "document_versions",
     "document_chunks",
+    "document_outbox",
     "chats",
     "messages",
     "message_events",

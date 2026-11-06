@@ -50,3 +50,6 @@ wheels/
 *.swo
 .DS_Store
 Thumbs.db
+
+# TypeScript
+*.tsbuildinfo

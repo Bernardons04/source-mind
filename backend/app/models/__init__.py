@@ -1,8 +1,8 @@
 from app.models.all_models import (
     Assistant,
     Document,
-    DocumentVersion,
     DocumentChunk,
+    DocumentOutbox,
     Chat,
     Message,
     MessageEvent,
@@ -13,8 +13,8 @@ from app.models.all_models import (
 __all__ = [
     "Assistant",
     "Document",
-    "DocumentVersion",
     "DocumentChunk",
+    "DocumentOutbox",
     "Chat",
     "Message",
     "MessageEvent",
