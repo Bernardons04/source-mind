@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { api, Assistant, Message } from "@/lib/api";
 import { ChatInterface } from "@/components/ChatInterface";
+import { Loader2 } from "lucide-react";
 
 export default function ExistingChatPage() {
   const params = useParams();
@@ -32,8 +33,9 @@ export default function ExistingChatPage() {
 
   if (loading) {
     return (
-      <div style={{ padding: "60px 0", textAlign: "center", color: "var(--muted)" }}>
-        Loading chat history...
+      <div className="page-spinner">
+        <Loader2 size={28} strokeWidth={2} className="animate-spin" style={{ color: "var(--accent)" }} />
+        <span>Loading chat history...</span>
       </div>
     );
   }

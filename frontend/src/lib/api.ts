@@ -34,10 +34,10 @@ export interface DocumentItem {
   id: string;
   assistant_id: string;
   name: string;
-  current_version_number: number;
+  upload_status: string;
   file_size: number;
   mime_type: string;
-  processing_status: "pending" | "processing" | "indexed" | "failed";
+  processing_status: "pending_upload" | "pending" | "processing" | "indexed" | "failed";
   processing_error: string | null;
   created_at: string;
   updated_at: string;
@@ -161,15 +161,10 @@ export const api = {
     return res.json();
   },
 
-  async replaceDocument(slug: string, docId: string, file: File): Promise<DocumentItem> {
+  async getDocumentStatus(slug: string, docId: string): Promise<DocumentItem> {
     const authHeaders = await getAuthHeader();
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const res = await fetch(`${API_BASE}/assistants/${slug}/documents/${docId}/replace`, {
-      method: "POST",
+    const res = await fetch(`${API_BASE}/assistants/${slug}/documents/${docId}/status`, {
       headers: authHeaders,
-      body: formData,
     });
     if (!res.ok) throw new Error(await res.text());
     return res.json();

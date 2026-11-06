@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useApp } from "@/lib/context";
+import { Sun, Moon, Zap, FileText, Shield, Settings2, Lock, FolderOpen } from "lucide-react";
 
 export default function LandingPage() {
   const { t, theme, toggleTheme } = useApp();
@@ -35,8 +36,11 @@ export default function LandingPage() {
             onClick={toggleTheme}
             title="Toggle appearance"
           >
-            <span>◐</span>
-            <span>{theme === "dark" ? "Dark" : "Light"}</span>
+            {theme === "dark"
+              ? <Moon size={20} strokeWidth={2} />
+              : <Sun size={20} strokeWidth={2} />
+            }
+            {/* <span>{theme === "dark" ? "Dark" : "Light"}</span> */}
           </button>
 
           <Link href="/login" className="quiet-button" style={{ textDecoration: "none" }}>
@@ -104,7 +108,7 @@ export default function LandingPage() {
             style={{ cursor: "default" }}
           >
             <div className="card-top">
-              <div className="card-symbol">⚡</div>
+              <div className="card-symbol"><Zap size={20} strokeWidth={1.5} /></div>
               <span className="status">Hybrid Search</span>
             </div>
             <div className="card-title">pgvector + Full-Text Search</div>
@@ -118,7 +122,7 @@ export default function LandingPage() {
             style={{ cursor: "default" }}
           >
             <div className="card-top">
-              <div className="card-symbol">▤</div>
+              <div className="card-symbol"><FileText size={20} strokeWidth={1.5} /></div>
               <span className="status">Verifiable</span>
             </div>
             <div className="card-title">Real Source Citations</div>
@@ -132,7 +136,7 @@ export default function LandingPage() {
             style={{ cursor: "default" }}
           >
             <div className="card-top">
-              <div className="card-symbol">🛡</div>
+              <div className="card-symbol"><Shield size={20} strokeWidth={1.5} /></div>
               <span className="status">Strict Grounding</span>
             </div>
             <div className="card-title">Zero-Hallucination Policy</div>
@@ -146,7 +150,7 @@ export default function LandingPage() {
             style={{ cursor: "default" }}
           >
             <div className="card-top">
-              <div className="card-symbol">⚙</div>
+              <div className="card-symbol"><Settings2 size={20} strokeWidth={1.5} /></div>
               <span className="status">LangGraph</span>
             </div>
             <div className="card-title">Observable Execution Trace</div>
@@ -160,7 +164,7 @@ export default function LandingPage() {
             style={{ cursor: "default" }}
           >
             <div className="card-top">
-              <div className="card-symbol">🔒</div>
+              <div className="card-symbol"><Lock size={20} strokeWidth={1.5} /></div>
               <span className="status">Encrypted</span>
             </div>
             <div className="card-title">Per-Assistant API Keys</div>
@@ -174,7 +178,7 @@ export default function LandingPage() {
             style={{ cursor: "default" }}
           >
             <div className="card-top">
-              <div className="card-symbol">📁</div>
+              <div className="card-symbol"><FolderOpen size={20} strokeWidth={1.5} /></div>
               <span className="status">Storage</span>
             </div>
             <div className="card-title">Versioning & Reprocessing</div>

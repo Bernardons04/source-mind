@@ -3,42 +3,43 @@
 import React from "react";
 import Link from "next/link";
 import { useApp } from "@/lib/context";
+import { PanelLeft } from "lucide-react";
 
 interface TopbarProps {
   breadcrumbs?: { label: string; href?: string }[];
 }
 
 export function Topbar({ breadcrumbs = [{ label: "Workspace" }, { label: "Assistants" }] }: TopbarProps) {
-  const { theme, toggleTheme } = useApp();
+  const { toggleSidebar, sidebarOpen } = useApp();
 
   return (
     <header className="topbar">
-      <div className="crumb">
-        {breadcrumbs.map((crumb, idx) => (
-          <React.Fragment key={idx}>
-            {idx > 0 && <span style={{ color: "#555b65", margin: "0 6px" }}>/</span>}
-            {crumb.href ? (
-              <Link href={crumb.href} style={{ color: "inherit", textDecoration: "none" }}>
-                {crumb.label}
-              </Link>
-            ) : (
-              <span>{crumb.label}</span>
-            )}
-          </React.Fragment>
-        ))}
-      </div>
-
-      <div className="top-actions">
+      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
         <button
           type="button"
-          className="quiet-button"
-          id="themeQuick"
-          onClick={toggleTheme}
-          title="Toggle light/dark appearance"
+          className="sidebar-toggle-btn"
+          id="toggleSidebarBtn"
+          onClick={toggleSidebar}
+          aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
         >
-          <span>◐</span>
-          <span id="quickThemeText">{theme === "dark" ? "Dark" : "Light"}</span>
+          <PanelLeft size={18} strokeWidth={2} />
         </button>
+
+        <div className="crumb">
+          {breadcrumbs.map((crumb, idx) => (
+            <React.Fragment key={idx}>
+              {idx > 0 && <span className="crumb-separator">/</span>}
+              {crumb.href ? (
+                <Link href={crumb.href} className="crumb-link">
+                  {crumb.label}
+                </Link>
+              ) : (
+                <span className="crumb-current">{crumb.label}</span>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
       </div>
     </header>
   );

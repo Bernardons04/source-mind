@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useApp } from "@/lib/context";
 import { api, Assistant } from "@/lib/api";
+import { X, Eye, EyeOff } from "lucide-react";
 
 interface CreateAssistantModalProps {
   isOpen: boolean;
@@ -100,7 +101,7 @@ export function CreateAssistantModal({ isOpen, onClose, onCreated }: CreateAssis
             onClick={onClose}
             aria-label="Close"
           >
-            ×
+            <X size={16} strokeWidth={2} />
           </button>
         </div>
 
@@ -161,8 +162,12 @@ export function CreateAssistantModal({ isOpen, onClose, onCreated }: CreateAssis
               type="button"
               className="reveal"
               onClick={() => setShowKey(!showKey)}
+              aria-label={showKey ? "Hide API key" : "Show API key"}
             >
-              {showKey ? t("createModal.hide") : t("createModal.show")}
+              {showKey
+                ? <EyeOff size={14} strokeWidth={2} />
+                : <Eye size={14} strokeWidth={2} />
+              }
             </button>
           </div>
           <small>{t("createModal.keyHelp")}</small>

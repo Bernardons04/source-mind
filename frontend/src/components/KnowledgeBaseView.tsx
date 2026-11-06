@@ -1,9 +1,19 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useApp } from "@/lib/context";
 import { api, Assistant, DocumentItem } from "@/lib/api";
+import {
+  ArrowLeft,
+  Plus,
+  Search,
+  Upload,
+  MoreHorizontal,
+  RefreshCw,
+  Trash2,
+  X,
+} from "lucide-react";
 
 interface KnowledgeBaseViewProps {
   assistant: Assistant;
@@ -19,8 +29,21 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
   const [activeMenuDocId, setActiveMenuDocId] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const replaceInputRef = useRef<HTMLInputElement>(null);
-  const [targetReplaceDocId, setTargetReplaceDocId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest(".doc-actions-wrapper")) {
+        setActiveMenuDocId(null);
+      }
+    };
+    if (activeMenuDocId) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [activeMenuDocId]);
 
   const refreshDocuments = async () => {
     try {
@@ -31,19 +54,51 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
     }
   };
 
+  // Automated polling when documents are being ingested
+  useEffect(() => {
+    const hasActiveProcessing = documents.some(
+      (d) =>
+        d.processing_status === "pending_upload" ||
+        d.processing_status === "pending" ||
+        d.processing_status === "processing"
+    );
+    if (!hasActiveProcessing) return;
+
+    const intervalId = setInterval(async () => {
+      try {
+        const refreshed = await api.getDocuments(assistant.slug);
+        setDocuments(refreshed);
+      } catch {
+        // Ignore polling errors and retry on next interval
+      }
+    }, 2500);
+
+    return () => clearInterval(intervalId);
+  }, [documents, assistant.slug]);
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
     setIsUploading(true);
     for (const file of files) {
+      const exists = documents.some((d) => d.name.toLowerCase() === file.name.toLowerCase());
+      if (exists) {
+        const proceed = window.confirm(
+          `Um documento com o nome "${file.name}" já existe nesta base de conhecimento. Deseja enviar assim mesmo como um novo documento?`
+        );
+        if (!proceed) {
+          continue;
+        }
+      }
+
       try {
-        showToast(`Uploading and indexing "${file.name}"...`);
+        showToast(`Enviando "${file.name}"...`);
         const newDoc = await api.uploadDocument(assistant.slug, file);
         setDocuments((prev) => [newDoc, ...prev]);
-        showToast(`"${file.name}" successfully processed and indexed!`);
+        showToast(`"${file.name}" enviado com sucesso! Processamento assíncrono em andamento...`);
       } catch (err: any) {
-        showToast(`Error processing "${file.name}": ${err.message}`);
+        showToast(`Erro ao enviar "${file.name}": ${err.message}`);
       }
     }
     setIsUploading(false);
@@ -51,32 +106,14 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
     refreshDocuments();
   };
 
-  const handleReplaceUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !targetReplaceDocId) return;
-
-    try {
-      showToast(`Replacing document with new version from "${file.name}"...`);
-      const updated = await api.replaceDocument(assistant.slug, targetReplaceDocId, file);
-      setDocuments((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
-      showToast(`Version ${updated.current_version_number} indexed successfully!`);
-    } catch (err: any) {
-      showToast(`Replacement failed: ${err.message}`);
-    } finally {
-      setTargetReplaceDocId(null);
-      if (replaceInputRef.current) replaceInputRef.current.value = "";
-      refreshDocuments();
-    }
-  };
-
   const handleReprocess = async (doc: DocumentItem) => {
     try {
-      showToast(`Reprocessing "${doc.name}"...`);
+      showToast(`Reenviando "${doc.name}" para a fila de processamento...`);
       const updated = await api.reprocessDocument(assistant.slug, doc.id);
       setDocuments((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
-      showToast(`"${doc.name}" reprocessed successfully.`);
+      showToast(`"${doc.name}" adicionado à fila de processamento assíncrono.`);
     } catch (err: any) {
-      showToast(`Reprocess failed: ${err.message}`);
+      showToast(`Falha no reprocessamento: ${err.message}`);
     } finally {
       setActiveMenuDocId(null);
     }
@@ -127,7 +164,8 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
   return (
     <>
       <Link href="/assistants" className="back-link" id="backToAssistants">
-        ← {t("nav.assistants")}
+        <ArrowLeft size={14} strokeWidth={2} />
+        {t("nav.assistants")}
       </Link>
 
       <div className="page-heading-row">
@@ -146,8 +184,16 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
           id="uploadTop"
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
+          style={{ display: "flex", alignItems: "center", gap: "7px" }}
         >
-          {isUploading ? "Uploading..." : `＋ ${t("knowledge.addDocs")}`}
+          {isUploading ? (
+            "Uploading..."
+          ) : (
+            <>
+              <Plus size={15} strokeWidth={2.5} />
+              {t("knowledge.addDocs")}
+            </>
+          )}
         </button>
       </div>
 
@@ -198,7 +244,9 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
 
           {/* Upload Zone */}
           <div className="upload-zone">
-            <div className="upload-symbol">↑</div>
+            <div className="upload-symbol">
+              <Upload size={22} strokeWidth={1.5} />
+            </div>
             <div className="upload-copy">
               <strong>{t("knowledge.uploadTitle")}</strong>
               <p>{t("knowledge.uploadSubtitle")}</p>
@@ -220,13 +268,6 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
               multiple
               hidden
             />
-            <input
-              type="file"
-              ref={replaceInputRef}
-              onChange={handleReplaceUpload}
-              accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
-              hidden
-            />
           </div>
 
           {/* Documents Panel */}
@@ -237,7 +278,7 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
                 <p>Files available to {assistant.name}</p>
               </div>
               <label className="kb-search">
-                <span>⌕</span>
+                <Search size={13} strokeWidth={2} color="var(--muted)" />
                 <input
                   id="docSearch"
                   value={searchTerm}
@@ -278,7 +319,7 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
                         <div style={{ minWidth: 0 }}>
                           <div className="doc-name">{doc.name}</div>
                           <div className="doc-meta">
-                            {formatFileSize(doc.file_size)} · v{doc.current_version_number} · Added {formatDate(doc.created_at)}
+                            {formatFileSize(doc.file_size)} · Added {formatDate(doc.created_at)}
                             {doc.processing_error && (
                               <span style={{ color: "#f87171", marginLeft: "6px" }}>
                                 (Error: {doc.processing_error.slice(0, 50)}...)
@@ -290,14 +331,14 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
 
                       <span className={`doc-status ${statusClass}`}>{statusText}</span>
 
-                      <div style={{ position: "relative" }}>
+                      <div className="doc-actions-wrapper" style={{ position: "relative" }}>
                         <button
                           type="button"
                           className="row-menu"
                           onClick={() => setActiveMenuDocId(isMenuOpen ? null : doc.id)}
                           aria-label="Document actions"
                         >
-                          ···
+                          <MoreHorizontal size={15} strokeWidth={2} />
                         </button>
 
                         {isMenuOpen && (
@@ -318,20 +359,12 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
                             <button
                               type="button"
                               className="menu-item"
-                              onClick={() => {
-                                setTargetReplaceDocId(doc.id);
-                                replaceInputRef.current?.click();
-                                setActiveMenuDocId(null);
-                              }}
-                            >
-                              <span>↑ {t("knowledge.replace")}</span>
-                            </button>
-                            <button
-                              type="button"
-                              className="menu-item"
                               onClick={() => handleReprocess(doc)}
                             >
-                              <span>↻ {t("knowledge.reprocess")}</span>
+                              <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                <RefreshCw size={13} strokeWidth={2} />
+                                {t("knowledge.reprocess")}
+                              </span>
                             </button>
                             <button
                               type="button"
@@ -339,7 +372,10 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
                               style={{ color: "#f87171" }}
                               onClick={() => handleDelete(doc)}
                             >
-                              <span>✕ {t("knowledge.delete")}</span>
+                              <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                <Trash2 size={13} strokeWidth={2} />
+                                {t("knowledge.delete")}
+                              </span>
                             </button>
                           </div>
                         )}
@@ -372,7 +408,7 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
                   fontSize: "12px",
                 }}
               >
-                <span>{d.name} (v{d.current_version_number})</span>
+                <span>{d.name}</span>
                 <span style={{ color: d.processing_status === "indexed" ? "var(--accent)" : "#fbbf24" }}>
                   {d.processing_status.toUpperCase()}
                 </span>

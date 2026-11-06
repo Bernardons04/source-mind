@@ -1,12 +1,20 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import Link from "next/link";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/lib/context";
 import { api, Assistant, Message } from "@/lib/api";
 import { CitationsList } from "./CitationsList";
-import { ExecutionEvents } from "./ExecutionEvents";
+import { ArrowUp, Loader2, Sparkles } from "lucide-react";
+import MarkdownIt from "markdown-it";
+
+// Singleton markdown renderer
+const md = new MarkdownIt({
+  html: false,        // disable raw HTML injection (XSS safety)
+  linkify: true,
+  typographer: true,
+  breaks: true,       // \n → <br>
+});
 
 interface ChatInterfaceProps {
   assistant: Assistant;
@@ -67,16 +75,13 @@ export function ChatInterface({
 
     try {
       let activeChatId = chatId;
-      // If no chat session created yet, create one
       if (!activeChatId) {
         const newChat = await api.createChat(assistant.slug, question.slice(0, 45));
         activeChatId = newChat.id;
         setChatId(newChat.id);
-        // Update URL quietly without full reload
         window.history.pushState(null, "", `/assistants/${assistant.slug}/chat/${newChat.id}`);
       }
 
-      // Send to backend RAG LangGraph workflow
       const assistantResponse = await api.sendMessage(assistant.slug, activeChatId, question);
       setMessages((prev) => [...prev, assistantResponse]);
     } catch (err: any) {
@@ -85,7 +90,7 @@ export function ChatInterface({
         id: "err-" + Date.now(),
         chat_id: chatId || "",
         role: "assistant",
-        content: `Error: ${err.message || "Could not generate response. Please check assistant OpenRouter key or connection."}`,
+        content: `**Error:** ${err.message || "Could not generate response. Please check assistant OpenRouter key or connection."}`,
         created_at: new Date().toISOString(),
         citations: [],
         events: [],
@@ -104,145 +109,128 @@ export function ChatInterface({
     }
   };
 
-  const assistantInitial = assistant.name.charAt(0).toUpperCase();
   const showWelcome = messages.length === 0;
 
   return (
-    <div className="chat-content">
-      {/* Topline */}
-      <div className="chat-topline">
-        <div className="chat-assistant">
-          <div className="card-symbol">{assistantInitial}</div>
-          <div>
-            <strong>{assistant.name}</strong>
-            <small>{t("chat.groundedNotice")}</small>
-          </div>
-        </div>
-
-        <Link
-          href={`/assistants/${assistant.slug}/knowledge`}
-          className="quiet-button"
-          id="chatKnowledge"
-          style={{ textDecoration: "none" }}
-        >
-          <span>▤</span>
-          <span>{t("chat.knowledgeButton")}</span>
-        </Link>
-      </div>
-
-      {/* Conversation */}
-      <div className="conversation">
-        {showWelcome && (
-          <>
-            <div className="welcome" id="welcomeBlock">
-              <div className="welcome-mark">✳</div>
-              <h2>{t("chat.welcomeTitle")}</h2>
-              <p>{t("chat.welcomeSubtitle")}</p>
-            </div>
-
-            <div className="suggestions" id="suggestions">
-              <button
-                type="button"
-                className="suggestion"
-                onClick={() => handleSendMessage(t("chat.suggestion1"))}
-              >
-                {t("chat.suggestion1")}
-                <span>{t("chat.suggestion1Sub")}</span>
-              </button>
-              <button
-                type="button"
-                className="suggestion"
-                onClick={() => handleSendMessage(t("chat.suggestion2"))}
-              >
-                {t("chat.suggestion2")}
-                <span>{t("chat.suggestion2Sub")}</span>
-              </button>
-              <button
-                type="button"
-                className="suggestion"
-                onClick={() => handleSendMessage(t("chat.suggestion3"))}
-              >
-                {t("chat.suggestion3")}
-                <span>{t("chat.suggestion3Sub")}</span>
-              </button>
-              <button
-                type="button"
-                className="suggestion"
-                onClick={() => handleSendMessage(t("chat.suggestion4"))}
-              >
-                {t("chat.suggestion4")}
-                <span>{t("chat.suggestion4Sub")}</span>
-              </button>
-            </div>
-          </>
-        )}
-
-        {/* Message Stream */}
-        <div className="messages" id="messages">
-          {messages.map((m) => (
-            <div
-              key={m.id}
-              className={`message ${m.role}`}
-            >
-              <div style={{ whiteSpace: "pre-wrap" }}>{m.content}</div>
-
-              {/* Citations */}
-              {m.citations && m.citations.length > 0 && (
-                <CitationsList citations={m.citations} />
-              )}
-
-              {/* LangGraph Execution Events */}
-              {m.events && m.events.length > 0 && (
-                <ExecutionEvents events={m.events} />
-              )}
-            </div>
-          ))}
-
-          {/* Loading indicator */}
-          {isLoading && (
-            <div className="message assistant" style={{ fontStyle: "italic", color: "var(--muted)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span className="animate-spin">⧗</span>
-                <span>{t("chat.sending")}</span>
+    <div className="chat-shell">
+      {/* Scrollable conversation area */}
+      <div className="conversation" id="conversation">
+        <div className="chat-content">
+          {showWelcome && (
+            <>
+              <div className="welcome" id="welcomeBlock">
+                <div className="welcome-mark">
+                  <Sparkles size={28} strokeWidth={1.5} />
+                </div>
+                <h2>{t("chat.welcomeTitle")}</h2>
+                <p>{t("chat.welcomeSubtitle")}</p>
               </div>
-            </div>
+
+              <div className="suggestions" id="suggestions">
+                <button
+                  type="button"
+                  className="suggestion"
+                  onClick={() => handleSendMessage(t("chat.suggestion1"))}
+                >
+                  {t("chat.suggestion1")}
+                  <span>{t("chat.suggestion1Sub")}</span>
+                </button>
+                <button
+                  type="button"
+                  className="suggestion"
+                  onClick={() => handleSendMessage(t("chat.suggestion2"))}
+                >
+                  {t("chat.suggestion2")}
+                  <span>{t("chat.suggestion2Sub")}</span>
+                </button>
+                <button
+                  type="button"
+                  className="suggestion"
+                  onClick={() => handleSendMessage(t("chat.suggestion3"))}
+                >
+                  {t("chat.suggestion3")}
+                  <span>{t("chat.suggestion3Sub")}</span>
+                </button>
+                <button
+                  type="button"
+                  className="suggestion"
+                  onClick={() => handleSendMessage(t("chat.suggestion4"))}
+                >
+                  {t("chat.suggestion4")}
+                  <span>{t("chat.suggestion4Sub")}</span>
+                </button>
+              </div>
+            </>
           )}
 
-          <div ref={messagesEndRef} />
+          {/* Message Stream */}
+          <div className="messages" id="messages">
+            {messages.map((m) => (
+              <div key={m.id} className={`message ${m.role}`}>
+                {m.role === "assistant" ? (
+                  <div
+                    className="markdown-body"
+                    dangerouslySetInnerHTML={{ __html: md.render(m.content) }}
+                  />
+                ) : (
+                  <div style={{ whiteSpace: "pre-wrap" }}>{m.content}</div>
+                )}
+
+                {/* Citations */}
+                {m.citations && m.citations.length > 0 && (
+                  <CitationsList citations={m.citations} />
+                )}
+              </div>
+            ))}
+
+            {/* Loading indicator */}
+            {isLoading && (
+              <div className="message assistant" style={{ fontStyle: "italic", color: "var(--muted)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Loader2 size={15} strokeWidth={2} className="animate-spin" />
+                  <span>{t("chat.sending")}</span>
+                </div>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
         </div>
       </div>
 
-      {/* Composer */}
+      {/* Sticky composer — always at the bottom */}
       <div className="composer-wrap">
-        <form
-          className="composer"
-          id="chatForm"
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSendMessage();
-          }}
-        >
-          <textarea
-            ref={textareaRef}
-            id="chatInput"
-            rows={1}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={t("chat.placeholder", { assistant: assistant.name })}
-            aria-label="Message"
-            disabled={isLoading}
-          />
-          <button
-            type="submit"
-            className="send-button"
-            disabled={isLoading || !input.trim()}
-            aria-label="Send message"
+        <div className="chat-content">
+          <form
+            className="composer"
+            id="chatForm"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSendMessage();
+            }}
           >
-            ↑
-          </button>
-        </form>
-        <p className="disclaimer">{t("chat.disclaimer")}</p>
+            <textarea
+              ref={textareaRef}
+              id="chatInput"
+              rows={1}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={t("chat.placeholder", { assistant: assistant.name })}
+              aria-label="Message"
+              disabled={isLoading}
+            />
+            <button
+              type="submit"
+              className="send-button"
+              disabled={isLoading || !input.trim()}
+              aria-label="Send message"
+            >
+              <ArrowUp size={17} strokeWidth={2.5} />
+            </button>
+          </form>
+          <p className="disclaimer">{t("chat.disclaimer")}</p>
+        </div>
       </div>
     </div>
   );

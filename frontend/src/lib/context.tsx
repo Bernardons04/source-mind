@@ -19,6 +19,9 @@ interface AppContextType {
   };
   signOut: () => Promise<void>;
   showToast: (msg: string) => void;
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
+  toggleSidebar: () => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -32,6 +35,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     initials: "YA",
   });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth > 800;
+    }
+    return true;
+  });
+
+  const toggleSidebar = () => setSidebarOpen((prev) => !prev);
 
   // Initialize theme, language & user session
   useEffect(() => {
@@ -139,6 +150,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         user,
         signOut,
         showToast,
+        sidebarOpen,
+        setSidebarOpen,
+        toggleSidebar,
       }}
     >
       {children}

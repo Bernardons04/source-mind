@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { api, Assistant, DocumentItem } from "@/lib/api";
 import { KnowledgeBaseView } from "@/components/KnowledgeBaseView";
+import { Loader2 } from "lucide-react";
 
 export default function KnowledgePage() {
   const params = useParams();
@@ -31,8 +32,9 @@ export default function KnowledgePage() {
 
   if (loading) {
     return (
-      <div style={{ padding: "60px 0", textAlign: "center", color: "var(--muted)" }}>
-        Loading knowledge base documents...
+      <div className="page-spinner">
+        <Loader2 size={28} strokeWidth={2} className="animate-spin" style={{ color: "var(--accent)" }} />
+        <span>Loading knowledge base...</span>
       </div>
     );
   }

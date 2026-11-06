@@ -6,6 +6,20 @@ import { usePathname, useRouter } from "next/navigation";
 import { useApp } from "@/lib/context";
 import { api, Assistant, Chat } from "@/lib/api";
 import { CreateAssistantModal } from "./CreateAssistantModal";
+import {
+  ChevronDown,
+  ChevronUp,
+  ChevronRight,
+  Plus,
+  LayoutGrid,
+  BookOpen,
+  MessageSquarePlus,
+  LogOut,
+  Check,
+  Sun,
+  Moon,
+  X,
+} from "lucide-react";
 
 interface SidebarProps {
   currentAssistant?: Assistant | null;
@@ -13,7 +27,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ currentAssistant, activeView = "assistants" }: SidebarProps) {
-  const { t, theme, toggleTheme, language, setLanguage, user, signOut } = useApp();
+  const { t, theme, toggleTheme, language, setLanguage, user, signOut, sidebarOpen, setSidebarOpen } = useApp();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -30,6 +44,13 @@ export function Sidebar({ currentAssistant, activeView = "assistants" }: Sidebar
       .then(setAssistants)
       .catch(() => {});
   }, []);
+
+  // Auto-close sidebar on mobile/tablet after route navigation
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth <= 800) {
+      setSidebarOpen(false);
+    }
+  }, [pathname, setSidebarOpen]);
 
   // Load chats for selected assistant
   useEffect(() => {
@@ -53,15 +74,34 @@ export function Sidebar({ currentAssistant, activeView = "assistants" }: Sidebar
 
   return (
     <>
-      <aside className="sidebar">
+      {/* Mobile/Tablet Backdrop Overlay */}
+      <div
+        className={`sidebar-overlay ${sidebarOpen ? "open" : ""}`}
+        onClick={() => setSidebarOpen(false)}
+        aria-hidden="true"
+      />
+
+      <aside className={`sidebar ${sidebarOpen ? "open" : "collapsed"}`}>
         {/* Brand */}
-        <Link href="/" className="brand">
-          <div className="brand-mark">M</div>
-          <div>
-            <div className="brand-name">{t("brand.name")}</div>
-            <div className="brand-sub">{t("brand.tagline")}</div>
-          </div>
-        </Link>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Link href="/" className="brand" style={{ padding: "2px 8px" }}>
+            <div className="brand-mark">M</div>
+            <div>
+              <div className="brand-name">{t("brand.name")}</div>
+              <div className="brand-sub">{t("brand.tagline")}</div>
+            </div>
+          </Link>
+
+          <button
+            type="button"
+            className="sidebar-close-btn"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close sidebar"
+            title="Close sidebar"
+          >
+            <X size={18} strokeWidth={2} />
+          </button>
+        </div>
 
         {/* Assistant Picker + Create Button */}
         <div className="assistant-picker" style={{ position: "relative" }}>
@@ -78,7 +118,7 @@ export function Sidebar({ currentAssistant, activeView = "assistants" }: Sidebar
                 {currentAssistant ? currentAssistant.name : t("nav.assistants")}
               </span>
             </span>
-            <span style={{ fontSize: "11px", color: "var(--muted)" }}>⌄</span>
+            <ChevronDown size={14} color="var(--muted)" strokeWidth={2} />
           </button>
 
           <button
@@ -89,7 +129,7 @@ export function Sidebar({ currentAssistant, activeView = "assistants" }: Sidebar
             aria-label="Create assistant"
             title="Create assistant"
           >
-            +
+            <Plus size={16} strokeWidth={2.5} />
           </button>
 
           {/* Assistant dropdown */}
@@ -115,7 +155,10 @@ export function Sidebar({ currentAssistant, activeView = "assistants" }: Sidebar
                 className="menu-item"
                 onClick={() => setIsAssistantMenuOpen(false)}
               >
-                <span>▦ {t("nav.assistants")} (Overview)</span>
+                <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <LayoutGrid size={13} strokeWidth={2} />
+                  {t("nav.assistants")} (Overview)
+                </span>
               </Link>
               <div style={{ height: "1px", background: "var(--border)", margin: "4px 0" }} />
               {assistants.length === 0 ? (
@@ -150,7 +193,7 @@ export function Sidebar({ currentAssistant, activeView = "assistants" }: Sidebar
             className={`nav-item ${activeView === "assistants" ? "active" : ""}`}
             id="navAssistants"
           >
-            <span className="nav-icon">▦</span>
+            <span className="nav-icon"><LayoutGrid size={15} strokeWidth={2} /></span>
             {t("nav.assistants")}
           </Link>
 
@@ -161,7 +204,7 @@ export function Sidebar({ currentAssistant, activeView = "assistants" }: Sidebar
                 className={`nav-item ${activeView === "knowledge" ? "active" : ""}`}
                 id="navKnowledge"
               >
-                <span className="nav-icon">▤</span>
+                <span className="nav-icon"><BookOpen size={15} strokeWidth={2} /></span>
                 {t("nav.knowledgeBase")}
               </Link>
               <Link
@@ -169,7 +212,7 @@ export function Sidebar({ currentAssistant, activeView = "assistants" }: Sidebar
                 className={`nav-item ${activeView === "chat" ? "active" : ""}`}
                 id="navNewChat"
               >
-                <span className="nav-icon">✳</span>
+                <span className="nav-icon"><MessageSquarePlus size={15} strokeWidth={2} /></span>
                 {t("nav.newChat")}
               </Link>
             </>
@@ -186,7 +229,10 @@ export function Sidebar({ currentAssistant, activeView = "assistants" }: Sidebar
                 onClick={() => setIsChatsOpen(!isChatsOpen)}
                 aria-label="Toggle chats"
               >
-                {isChatsOpen ? "⌄" : "›"}
+                {isChatsOpen
+                  ? <ChevronDown size={13} strokeWidth={2} />
+                  : <ChevronRight size={13} strokeWidth={2} />
+                }
               </button>
             </div>
 
@@ -242,7 +288,7 @@ export function Sidebar({ currentAssistant, activeView = "assistants" }: Sidebar
                 onClick={() => setLanguage("en")}
               >
                 <span>English</span>
-                {language === "en" && <span style={{ color: "var(--accent)" }}>✓</span>}
+                {language === "en" && <Check size={13} color="var(--accent)" strokeWidth={2.5} />}
               </button>
               <button
                 type="button"
@@ -250,7 +296,7 @@ export function Sidebar({ currentAssistant, activeView = "assistants" }: Sidebar
                 onClick={() => setLanguage("pt")}
               >
                 <span>Português</span>
-                {language === "pt" && <span style={{ color: "var(--accent)" }}>✓</span>}
+                {language === "pt" && <Check size={13} color="var(--accent)" strokeWidth={2.5} />}
               </button>
               <button
                 type="button"
@@ -258,7 +304,7 @@ export function Sidebar({ currentAssistant, activeView = "assistants" }: Sidebar
                 onClick={() => setLanguage("es")}
               >
                 <span>Español</span>
-                {language === "es" && <span style={{ color: "var(--accent)" }}>✓</span>}
+                {language === "es" && <Check size={13} color="var(--accent)" strokeWidth={2.5} />}
               </button>
 
               <div style={{ height: "1px", background: "var(--border)", margin: "6px 0" }} />
@@ -270,8 +316,11 @@ export function Sidebar({ currentAssistant, activeView = "assistants" }: Sidebar
                 onClick={toggleTheme}
               >
                 <span>{t("user.appearance")}</span>
-                <span id="themeLabel">
-                  {theme === "dark" ? `${t("user.darkMode")} ✓` : `${t("user.lightMode")} ✓`}
+                <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                  {theme === "dark"
+                    ? <><Moon size={12} strokeWidth={2} /> {t("user.darkMode")}</>
+                    : <><Sun size={12} strokeWidth={2} /> {t("user.lightMode")}</>
+                  }
                 </span>
               </button>
 
@@ -285,7 +334,7 @@ export function Sidebar({ currentAssistant, activeView = "assistants" }: Sidebar
                 style={{ color: "#f87171" }}
               >
                 <span>{t("user.signOut")}</span>
-                <span>↪</span>
+                <LogOut size={13} strokeWidth={2} />
               </button>
             </div>
           )}
@@ -301,7 +350,10 @@ export function Sidebar({ currentAssistant, activeView = "assistants" }: Sidebar
               <span className="user-name">{user.name || t("user.account")}</span>
               <span className="user-email">{user.email || "you@example.com"}</span>
             </span>
-            <span style={{ color: "var(--muted)" }}>{isUserMenuOpen ? "⌄" : "⌃"}</span>
+            {isUserMenuOpen
+              ? <ChevronUp size={14} color="var(--muted)" strokeWidth={2} />
+              : <ChevronDown size={14} color="var(--muted)" strokeWidth={2} />
+            }
           </button>
         </div>
       </aside>

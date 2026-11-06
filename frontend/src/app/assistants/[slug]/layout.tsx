@@ -25,6 +25,7 @@ export default function AssistantLayout({ children }: { children: React.ReactNod
   }, [slug]);
 
   const isKnowledge = pathname.includes("/knowledge");
+  const isChat = !isKnowledge;
   const activeView = isKnowledge ? "knowledge" : "chat";
 
   const breadcrumbs = [
@@ -39,19 +40,35 @@ export default function AssistantLayout({ children }: { children: React.ReactNod
 
       <main className="main">
         <Topbar breadcrumbs={breadcrumbs} />
-        <section className="content" style={{ padding: isKnowledge ? "36px 42px 56px" : "20px 32px 30px" }}>
-          {loading ? (
-            <div style={{ padding: "60px 0", textAlign: "center", color: "var(--muted)" }}>
-              Loading assistant...
-            </div>
-          ) : assistant ? (
-            children
-          ) : (
-            <div style={{ padding: "60px 0", textAlign: "center", color: "#f87171" }}>
-              Assistant not found.
-            </div>
-          )}
-        </section>
+        {isChat ? (
+          <div style={{ flex: 1, display: "flex", overflow: "hidden", minHeight: 0 }}>
+            {loading ? (
+              <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)" }}>
+                Loading assistant...
+              </div>
+            ) : assistant ? (
+              children
+            ) : (
+              <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#f87171" }}>
+                Assistant not found.
+              </div>
+            )}
+          </div>
+        ) : (
+          <section className="content">
+            {loading ? (
+              <div style={{ padding: "60px 0", textAlign: "center", color: "var(--muted)" }}>
+                Loading assistant...
+              </div>
+            ) : assistant ? (
+              children
+            ) : (
+              <div style={{ padding: "60px 0", textAlign: "center", color: "#f87171" }}>
+                Assistant not found.
+              </div>
+            )}
+          </section>
+        )}
       </main>
     </div>
   );

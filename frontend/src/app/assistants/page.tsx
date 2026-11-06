@@ -8,6 +8,7 @@ import { api, Assistant } from "@/lib/api";
 import { Sidebar } from "@/components/Sidebar";
 import { Topbar } from "@/components/Topbar";
 import { CreateAssistantModal } from "@/components/CreateAssistantModal";
+import { Sparkles, Search, Plus, FileText, ArrowUpRight, Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function AssistantsPage() {
   const { t, showToast } = useApp();
@@ -86,14 +87,15 @@ export default function AssistantsPage() {
 
         <section className="content">
           {isLoading ? (
-            <div style={{ padding: "60px 0", textAlign: "center", color: "var(--muted)" }}>
-              Loading your workspace...
+            <div className="page-spinner">
+              <Loader2 size={28} strokeWidth={2} className="animate-spin" style={{ color: "var(--accent)" }} />
+              <span>Loading your workspace...</span>
             </div>
           ) : assistants.length === 0 ? (
             /* First-time onboarding: direct centered creation form */
             <div style={{ maxWidth: "480px", margin: "40px auto" }}>
               <div style={{ textAlign: "center", marginBottom: "28px" }}>
-                <div className="welcome-mark">✳</div>
+                <div className="welcome-mark"><Sparkles size={28} strokeWidth={1.5} /></div>
                 <h2>{t("assistants.emptyState")}</h2>
                 <p style={{ color: "var(--muted)", fontSize: "13px" }}>
                   {t("assistants.emptyStateAction")}
@@ -171,8 +173,9 @@ export default function AssistantsPage() {
                       type="button"
                       className="reveal"
                       onClick={() => setFirstShowKey(!firstShowKey)}
+                      aria-label={firstShowKey ? "Hide API key" : "Show API key"}
                     >
-                      {firstShowKey ? t("createModal.hide") : t("createModal.show")}
+                      {firstShowKey ? <EyeOff size={14} strokeWidth={2} /> : <Eye size={14} strokeWidth={2} />}
                     </button>
                   </div>
                   <small>{t("createModal.keyHelp")}</small>
@@ -213,7 +216,7 @@ export default function AssistantsPage() {
 
               <div className="toolbar">
                 <label className="search">
-                  <span>⌕</span>
+                  <Search size={13} strokeWidth={2} color="var(--muted)" />
                   <input
                     id="searchInput"
                     type="search"
@@ -227,8 +230,9 @@ export default function AssistantsPage() {
                   className="primary"
                   id="createFromPage"
                   onClick={() => setIsModalOpen(true)}
+                  style={{ display: "flex", alignItems: "center", gap: "6px" }}
                 >
-                  ＋ {t("assistants.createButton")}
+                  <Plus size={15} strokeWidth={2.5} /> {t("assistants.createButton")}
                 </button>
               </div>
 
@@ -255,10 +259,11 @@ export default function AssistantsPage() {
                       <div className="card-title">{ast.name}</div>
                       <p className="card-desc">{promptDesc}</p>
                       <div className="card-footer">
-                        <span className="file-count">
-                          ▤ {t("assistants.documentsCount", { count: ast.document_count })}
+                        <span className="file-count" style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                          <FileText size={12} strokeWidth={2} />
+                          {t("assistants.documentsCount", { count: ast.document_count })}
                         </span>
-                        <span className="arrow">↗</span>
+                        <span className="arrow"><ArrowUpRight size={14} strokeWidth={2} /></span>
                       </div>
                     </Link>
                   );
