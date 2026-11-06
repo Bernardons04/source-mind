@@ -97,11 +97,9 @@ async def retrieve_evidence_node(state: RAGState) -> Dict[str, Any]:
             dc.metadata,
             (dc.embedding <=> (:query_emb)::vector) AS distance
         FROM document_chunks dc
-        JOIN document_versions dv ON dc.document_version_id = dv.id
-        JOIN documents d ON dv.document_id = d.id
+        JOIN documents d ON dc.document_id = d.id
         WHERE d.assistant_id = :assistant_id
-          AND dv.version_number = d.current_version_number
-          AND dv.processing_status = 'indexed'
+          AND d.processing_status = 'indexed'
           AND dc.embedding IS NOT NULL
         ORDER BY distance ASC
         LIMIT 8
@@ -123,14 +121,12 @@ async def retrieve_evidence_node(state: RAGState) -> Dict[str, Any]:
             d.name AS document_name,
             dc.content,
             dc.metadata,
-            ts_rank_cd(to_tsvector('english', dc.content), plainto_tsquery('english', :lexical_query)) AS rank
+            ts_rank_cd(to_tsvector('portuguese', dc.content), plainto_tsquery('portuguese', :lexical_query)) AS rank
         FROM document_chunks dc
-        JOIN document_versions dv ON dc.document_version_id = dv.id
-        JOIN documents d ON dv.document_id = d.id
+        JOIN documents d ON dc.document_id = d.id
         WHERE d.assistant_id = :assistant_id
-          AND dv.version_number = d.current_version_number
-          AND dv.processing_status = 'indexed'
-          AND to_tsvector('english', dc.content) @@ plainto_tsquery('english', :lexical_query)
+          AND d.processing_status = 'indexed'
+          AND to_tsvector('portuguese', dc.content) @@ plainto_tsquery('portuguese', :lexical_query)
         ORDER BY rank DESC
         LIMIT 8
     """)
@@ -151,11 +147,9 @@ async def retrieve_evidence_node(state: RAGState) -> Dict[str, Any]:
                 dc.metadata,
                 1.0 AS rank
             FROM document_chunks dc
-            JOIN document_versions dv ON dc.document_version_id = dv.id
-            JOIN documents d ON dv.document_id = d.id
+            JOIN documents d ON dc.document_id = d.id
             WHERE d.assistant_id = :assistant_id
-              AND dv.version_number = d.current_version_number
-              AND dv.processing_status = 'indexed'
+              AND d.processing_status = 'indexed'
             LIMIT 6
         """)
         try:
