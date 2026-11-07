@@ -89,6 +89,54 @@ def clean_text(text: str) -> str:
     return re.sub(r"\n{3,}", "\n\n", joined).strip()
 
 
+_BULLET_PATTERN = re.compile(r"^(?:[-*•●–—+]|\d+[.)])\s+")
+
+
+def _should_preserve_line_break(prev_line: str, curr_line: str) -> bool:
+    """
+    Determines whether a line break between two consecutive lines within a paragraph block
+    should be preserved.
+    Preserves breaks for table rows, new list items, and introductory colon lines.
+    Merges artificial line breaks caused by hard wrapping, sentence wrapping, or word-level extraction.
+    """
+    prev = prev_line.strip()
+    curr = curr_line.strip()
+    if not prev or not curr:
+        return True
+    if prev.startswith("|") or curr.startswith("|"):
+        return True
+    if _BULLET_PATTERN.match(curr):
+        return True
+    if _BULLET_PATTERN.match(prev):
+        # If prev was a list item and curr is not a new list item, curr is a continuation line
+        return False
+    if prev.endswith(":"):
+        return True
+    return False
+
+
+def _join_paragraph_lines(lines: List[str]) -> str:
+    """
+    Intelligently joins lines within a paragraph block.
+    Removes artificial line breaks between words while preserving genuine structure
+    (lists, colons, completed sentences, and hyphenated word wrapping).
+    """
+    cleaned = [l.strip() for l in lines if l.strip()]
+    if not cleaned:
+        return ""
+    result = [cleaned[0]]
+    for line in cleaned[1:]:
+        prev = result[-1]
+        if _should_preserve_line_break(prev, line):
+            result.append(line)
+        else:
+            if prev.endswith("-") and not prev.endswith(" -") and len(prev) > 1 and prev[-2].isalpha():
+                result[-1] = prev[:-1] + line
+            else:
+                result[-1] = prev + " " + line
+    return "\n".join(result)
+
+
 # ---------------------------------------------------------------------------
 # Structural Parsing Data Structures
 # ---------------------------------------------------------------------------
@@ -591,10 +639,24 @@ def _merge_segments_to_chunks(
 # ---------------------------------------------------------------------------
 
 
+def _is_word_stacked(text: str) -> bool:
+    """
+    Detects if extracted PDF text suffers from artificial word stacking
+    (e.g. one word per line caused by character/word-level PDF text positioning).
+    """
+    lines = [l.strip() for l in text.split("\n") if l.strip()]
+    if len(lines) < 6:
+        return False
+    single_word_lines = sum(1 for l in lines if " " not in l)
+    return (single_word_lines / len(lines)) > 0.6
+
+
 def extract_text_from_pdf(file_bytes: bytes) -> Tuple[str, List[ParsedSection]]:
     """
     Extracts text from PDF page by page.
     Preserves exact 1-indexed page provenance for every section.
+    Uses layout-aware extraction to reconstruct natural lines and paragraphs,
+    with automatic fallback to plain extraction when layout mode fails or is empty.
     """
     reader = pypdf.PdfReader(io.BytesIO(file_bytes))
     sections: List[ParsedSection] = []
@@ -603,7 +665,24 @@ def extract_text_from_pdf(file_bytes: bytes) -> Tuple[str, List[ParsedSection]]:
 
     for idx, page in enumerate(reader.pages):
         page_num = idx + 1
-        page_text = page.extract_text() or ""
+        page_text = ""
+
+        # 1. Attempt layout mode extraction first (fixes word-level vertical displacement)
+        try:
+            layout_candidate = page.extract_text(extraction_mode="layout") or ""
+            if layout_candidate.strip() and not _is_word_stacked(layout_candidate):
+                page_text = layout_candidate
+        except Exception:
+            page_text = ""
+
+        # 2. Fallback to standard plain extraction if layout is unavailable or stacked
+        if not page_text.strip():
+            try:
+                plain_candidate = page.extract_text() or ""
+                page_text = plain_candidate
+            except Exception:
+                page_text = ""
+
         page_text = clean_text(page_text)
         if page_text:
             sections.append(
@@ -914,7 +993,7 @@ def chunk_document_sections(
             if not raw_text:
                 if curr_para_lines:
                     section_segments.append(
-                        TextSegment(text="\n".join(curr_para_lines), page=curr_para_page)
+                        TextSegment(text=_join_paragraph_lines(curr_para_lines), page=curr_para_page)
                     )
                     curr_para_lines = []
                     curr_para_page = None
@@ -924,7 +1003,7 @@ def chunk_document_sections(
             if is_tbl:
                 if curr_para_lines:
                     section_segments.append(
-                        TextSegment(text="\n".join(curr_para_lines), page=curr_para_page)
+                        TextSegment(text=_join_paragraph_lines(curr_para_lines), page=curr_para_page)
                     )
                     curr_para_lines = []
                     curr_para_page = None
@@ -960,7 +1039,7 @@ def chunk_document_sections(
 
         if curr_para_lines:
             section_segments.append(
-                TextSegment(text="\n".join(curr_para_lines), page=curr_para_page)
+                TextSegment(text=_join_paragraph_lines(curr_para_lines), page=curr_para_page)
             )
 
         if not section_segments:
