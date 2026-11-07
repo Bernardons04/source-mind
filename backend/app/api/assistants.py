@@ -17,14 +17,19 @@ async def list_assistants(
     user: AuthenticatedUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Lists all assistants belonging to the authenticated user."""
+    """Lists all active assistants belonging to the authenticated user."""
     stmt = (
         select(
             Assistant,
             func.count(Document.id).label("doc_count")
         )
         .outerjoin(Document, Assistant.id == Document.assistant_id)
-        .where(Assistant.user_id == user.id)
+        .where(
+            and_(
+                Assistant.user_id == user.id,
+                Assistant.deletion_status == "active",
+            )
+        )
         .group_by(Assistant.id)
         .order_by(Assistant.created_at.desc())
     )
@@ -97,11 +102,17 @@ async def get_assistant(
     user: AuthenticatedUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Retrieves an assistant by slug for the authenticated user."""
+    """Retrieves an active assistant by slug for the authenticated user."""
     stmt = (
         select(Assistant, func.count(Document.id).label("doc_count"))
         .outerjoin(Document, Assistant.id == Document.assistant_id)
-        .where(and_(Assistant.user_id == user.id, Assistant.slug == slug))
+        .where(
+            and_(
+                Assistant.user_id == user.id,
+                Assistant.slug == slug,
+                Assistant.deletion_status == "active",
+            )
+        )
         .group_by(Assistant.id)
     )
     res = await db.execute(stmt)
@@ -130,7 +141,13 @@ async def update_assistant(
     db: AsyncSession = Depends(get_db),
 ):
     """Updates assistant configuration or rotates OpenRouter API key."""
-    stmt = select(Assistant).where(and_(Assistant.user_id == user.id, Assistant.slug == slug))
+    stmt = select(Assistant).where(
+        and_(
+            Assistant.user_id == user.id,
+            Assistant.slug == slug,
+            Assistant.deletion_status == "active",
+        )
+    )
     res = await db.execute(stmt)
     assistant = res.scalars().first()
     if not assistant:
@@ -185,7 +202,13 @@ async def delete_assistant(
     db: AsyncSession = Depends(get_db),
 ):
     """Deletes an assistant and all associated documents and chats."""
-    stmt = select(Assistant).where(and_(Assistant.user_id == user.id, Assistant.slug == slug))
+    stmt = select(Assistant).where(
+        and_(
+            Assistant.user_id == user.id,
+            Assistant.slug == slug,
+            Assistant.deletion_status == "active",
+        )
+    )
     res = await db.execute(stmt)
     assistant = res.scalars().first()
     if not assistant:

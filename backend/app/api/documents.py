@@ -20,7 +20,13 @@ MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024  # 25 MB
 
 
 async def _get_user_assistant(slug: str, user: AuthenticatedUser, db: AsyncSession) -> Assistant:
-    stmt = select(Assistant).where(and_(Assistant.user_id == user.id, Assistant.slug == slug))
+    stmt = select(Assistant).where(
+        and_(
+            Assistant.user_id == user.id,
+            Assistant.slug == slug,
+            Assistant.deletion_status == "active",
+        )
+    )
     res = await db.execute(stmt)
     assistant = res.scalars().first()
     if not assistant:
@@ -246,33 +252,6 @@ async def reprocess_document(
         created_at=doc.created_at,
         updated_at=doc.updated_at,
     )
-
-
-@router.delete("/{doc_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_document(
-    slug: str,
-    doc_id: uuid.UUID,
-    user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    """Deletes a document, its indexed chunks, and storage file."""
-    assistant = await _get_user_assistant(slug, user, db)
-
-    stmt = select(Document).where(and_(Document.id == doc_id, Document.assistant_id == assistant.id))
-    res = await db.execute(stmt)
-    doc = res.scalars().first()
-    if not doc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
-
-    if doc.storage_path:
-        try:
-            await storage_service.delete_file(user.token, doc.storage_path)
-        except Exception:
-            pass
-
-    await db.delete(doc)
-    await db.commit()
-    return None
 
 
 @router.delete("/{doc_id}", status_code=status.HTTP_204_NO_CONTENT)
