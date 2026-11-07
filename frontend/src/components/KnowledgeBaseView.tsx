@@ -10,10 +10,8 @@ import {
   Plus,
   Search,
   Upload,
-  MoreHorizontal,
-  RefreshCw,
   Trash2,
-  X,
+  Loader2,
 } from "lucide-react";
 
 interface KnowledgeBaseViewProps {
@@ -27,24 +25,9 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<"documents" | "processing" | "settings">("documents");
   const [isUploading, setIsUploading] = useState(false);
-  const [activeMenuDocId, setActiveMenuDocId] = useState<string | null>(null);
+  const [deletingDocIds, setDeletingDocIds] = useState<Set<string>>(new Set());
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest(".doc-actions-wrapper")) {
-        setActiveMenuDocId(null);
-      }
-    };
-    if (activeMenuDocId) {
-      document.addEventListener("mousedown", handleOutsideClick);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-    };
-  }, [activeMenuDocId]);
 
   const refreshDocuments = async () => {
     try {
@@ -101,7 +84,10 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
       try {
         showToast(`Enviando "${file.name}"...`);
         const newDoc = await api.uploadDocument(assistant.slug, file);
-        setDocuments((prev) => [newDoc, ...prev]);
+        setDocuments((prev) => {
+          const filtered = prev.filter((d) => d.id !== newDoc.id);
+          return [newDoc, ...filtered];
+        });
         showToast(`"${file.name}" enviado com sucesso! Processamento assíncrono em andamento...`);
       } catch (err: any) {
         showToast(`Erro ao enviar "${file.name}": ${err.message}`);
@@ -112,21 +98,9 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
     refreshDocuments();
   };
 
-  const handleReprocess = async (doc: DocumentItem) => {
-    try {
-      showToast(`Reenviando "${doc.name}" para a fila de processamento...`);
-      const updated = await api.reprocessDocument(assistant.slug, doc.id);
-      setDocuments((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
-      showToast(`"${doc.name}" adicionado à fila de processamento assíncrono.`);
-    } catch (err: any) {
-      showToast(`Falha no reprocessamento: ${err.message}`);
-    } finally {
-      setActiveMenuDocId(null);
-    }
-  };
-
   const handleDelete = async (doc: DocumentItem) => {
-    setActiveMenuDocId(null);
+    if (deletingDocIds.has(doc.id)) return;
+
     const result = await modalSwal.fire({
       title: "Excluir documento?",
       text: `Tem certeza de que deseja remover "${doc.name}" da base de conhecimento?`,
@@ -139,12 +113,19 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
 
     if (!result.isConfirmed) return;
 
+    setDeletingDocIds((prev) => new Set(prev).add(doc.id));
     try {
       await api.deleteDocument(assistant.slug, doc.id);
       setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
       showToast(`Document "${doc.name}" deleted.`);
     } catch (err: any) {
       showToast(`Delete failed: ${err.message}`);
+    } finally {
+      setDeletingDocIds((prev) => {
+        const next = new Set(prev);
+        next.delete(doc.id);
+        return next;
+      });
     }
   };
 
@@ -326,7 +307,7 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
                     statusClass = "processing";
                   }
 
-                  const isMenuOpen = activeMenuDocId === doc.id;
+                  const isDeleting = deletingDocIds.has(doc.id);
 
                   return (
                     <div className="doc-row" key={doc.id}>
@@ -347,54 +328,21 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
 
                       <span className={`doc-status ${statusClass}`}>{statusText}</span>
 
-                      <div className="doc-actions-wrapper" style={{ position: "relative" }}>
+                      <div className="doc-actions-wrapper">
                         <button
                           type="button"
-                          className="row-menu"
-                          onClick={() => setActiveMenuDocId(isMenuOpen ? null : doc.id)}
-                          aria-label="Document actions"
+                          className="doc-delete-btn"
+                          onClick={() => handleDelete(doc)}
+                          disabled={isDeleting}
+                          title={t("knowledge.delete")}
+                          aria-label={t("knowledge.delete")}
                         >
-                          <MoreHorizontal size={15} strokeWidth={2} />
+                          {isDeleting ? (
+                            <Loader2 size={15} strokeWidth={2} className="animate-spin" />
+                          ) : (
+                            <Trash2 size={15} strokeWidth={2} />
+                          )}
                         </button>
-
-                        {isMenuOpen && (
-                          <div
-                            style={{
-                              position: "absolute",
-                              right: 0,
-                              top: "30px",
-                              background: "var(--panel)",
-                              border: "1px solid var(--border)",
-                              borderRadius: "9px",
-                              padding: "5px",
-                              zIndex: 100,
-                              boxShadow: "0 10px 25px #0007",
-                              minWidth: "180px",
-                            }}
-                          >
-                            <button
-                              type="button"
-                              className="menu-item"
-                              onClick={() => handleReprocess(doc)}
-                            >
-                              <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                <RefreshCw size={13} strokeWidth={2} />
-                                {t("knowledge.reprocess")}
-                              </span>
-                            </button>
-                            <button
-                              type="button"
-                              className="menu-item"
-                              style={{ color: "#f87171" }}
-                              onClick={() => handleDelete(doc)}
-                            >
-                              <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                <Trash2 size={13} strokeWidth={2} />
-                                {t("knowledge.delete")}
-                              </span>
-                            </button>
-                          </div>
-                        )}
                       </div>
                     </div>
                   );
