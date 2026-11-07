@@ -1,6 +1,6 @@
 {
   "brand": {
-    "name": "ManualMind",
+    "name": "SourceMind",
     "tagline": "Conocimiento, hecho útil."
   },
   "nav": {
@@ -117,16 +117,120 @@
     "suggestion4": "¿Cuál es la política de trabajo remoto?",
     "suggestion4Sub": "Directrices laborales",
     "placeholder": "Haz una pregunta a {{assistant}}...",
-    "disclaimer": "ManualMind puede cometer errores. Comprueba la fuente citada antes de tomar decisiones.",
+    "disclaimer": "SourceMind puede cometer errores. Comprueba la fuente citada antes de tomar decisiones.",
     "citationsTitle": "Fuentes y Citas",
     "eventsTitle": "Rastreo de ejecución (LangGraph)",
     "sending": "Generando respuesta..."
   },
   "auth": {
-    "signInTitle": "Bienvenido a ManualMind",
+    "signInTitle": "Bienvenido a SourceMind",
     "signInSubtitle": "Asistentes de IA privados fundamentados en tus documentos verificados.",
     "googleButton": "Continuar con Google",
     "signingIn": "Redirigiendo a Google...",
     "tagline": "RAG de grado empresarial con citas reales y cero tolerancia a alucinaciones."
+  },
+  "landing": {
+    "nav": {
+      "how": "Cómo funciona",
+      "confidence": "Confianza",
+      "cta": "Empezar",
+      "workspace": "Ir al Workspace",
+      "menuWorkspace": "Workspace",
+      "menuLogout": "Cerrar sesión",
+      "accountFallback": "Tu cuenta"
+    },
+    "hero": {
+      "badge": "Respuestas con fuente, siempre",
+      "titleBefore": "Cada respuesta apunta a la página ",
+      "titleHighlight": "de donde vino.",
+      "lead": "SourceMind crea asistentes privados para consultar tus manuales, políticas y contratos. Si los documentos no contienen la información, el asistente te lo indica.",
+      "ctaPrimary": "Crear mi asistente",
+      "ctaSecondary": "Ver cómo funciona"
+    },
+    "how": {
+      "title": "Del archivo a la respuesta en cuatro pasos.",
+      "step1Title": "1. Crea un asistente",
+      "step1Desc": "Asigna un nombre y conecta tu clave OpenRouter. Cada asistente tiene su propia base e historial.",
+      "step2Title": "2. Sube los documentos",
+      "step2Desc": "Añade archivos PDF, DOCX o TXT con extracción limpia e indexación vectorial.",
+      "step3Title": "3. Haz una pregunta",
+      "step3Desc": "Escribe en lenguaje natural. La búsqueda combina semántica y palabras clave exactas.",
+      "step4Title": "4. Comprueba la fuente",
+      "step4Desc": "La respuesta incluye documento, página y fragmento original en un acordeón dedicado."
+    },
+    "mock": {
+      "question": "¿Cuántos días de vacaciones tengo?",
+      "answer": "Los colaboradores a tiempo completo tienen 30 días de vacaciones pagadas por año.",
+      "docPdf": "Manual del Empleado.pdf",
+      "page14": "Página 14",
+      "citations": "Fuentes y citas",
+      "item1": "Los colaboradores a tiempo completo tienen derecho a 30 días de vacaciones remuneradas por año civil.",
+      "item2": "Los días de vacaciones no utilizados pueden transferirse hasta el 31 de marzo del año siguiente, previa aprobación del responsable.",
+      "badgeVerified": "Cita verificada",
+      "badgeNoEvidence": "Sin evidencia suficiente",
+      "badgeIndexed": "Documento indexado",
+      "hybridSearch": "Búsqueda híbrida",
+      "sufficientEvidence": "Evidencia suficiente",
+      "disclaimer": "Pantallas reales de SourceMind. La respuesta flotante es un ejemplo ilustrativo con datos ficticios."
+    },
+    "problem": {
+      "title": "Hoy la respuesta está dispersa en varios archivos.",
+      "lead1": "La regla principal está en un PDF, la excepción en otro documento y la versión más reciente en el correo de alguien. Buscar archivo por archivo consume tiempo, y una IA genérica te obliga a confiar en algo que nadie puede contrastar.",
+      "lead2": "En SourceMind, cada asistente consulta únicamente los documentos que has añadido y responde basándose estrictamente en ellos, citando la fuente exacta.",
+      "query": "¿Cuántos días de vacaciones tengo?",
+      "doc1Name": "Manual del Empleado.pdf",
+      "doc1Text": "Los colaboradores a tiempo completo tienen derecho a 30 días de vacaciones remuneradas por año civil.",
+      "doc2Name": "Política de Vacaciones.docx",
+      "doc2Text": "Los días de vacaciones no utilizados pueden transferirse hasta el 31 de marzo del año siguiente, previa aprobación del responsable.",
+      "doc3Name": "Política de Teletrabajo.docx",
+      "doc3Text": "El trabajo remoto se permite hasta tres días por semana, a criterio del equipo.",
+      "doc4Name": "Contrato de Proveedor.pdf",
+      "doc4Text": "El pago de las facturas debe efectuarse en un plazo máximo de 30 días tras su recepción.",
+      "doc4Note": "También menciona “30 días”, pero es sobre otro asunto.",
+      "ans1": "Los colaboradores a tiempo completo tienen 30 días de vacaciones pagadas por año.",
+      "ans2": "Los días no utilizados pueden transferirse hasta el 31 de marzo con aprobación del responsable.",
+      "src1": "1 Manual del Empleado.pdf, página 14",
+      "src2": "2 Política de Vacaciones.docx, sección 3.2",
+      "step1": "1. Haces una pregunta en lenguaje natural.",
+      "step2": "2. El asistente consulta tus archivos y selecciona solo los fragmentos pertinentes. Los archivos irrelevantes quedan fuera.",
+      "step3": "3. La respuesta se presenta con citas directas para que puedas comprobarla."
+    },
+    "confidence": {
+      "title": "Diseñado para decir “no lo sé”.",
+      "subtitle": "Una respuesta solo es útil si puedes verificarla. Sin fragmentos que la respalden, el asistente se abstiene con honestidad en lugar de inventar datos.",
+      "abstQuery": "¿Cuál es la política de permiso parental para contratistas?",
+      "abstBadge": "Sin evidencia suficiente",
+      "abstText": "No he encontrado evidencia suficiente en los documentos indexados para responder a esta pregunta. Añade la política correspondiente o reformula tu consulta.",
+      "abstNote": "Criterio estricto de relevancia: si la búsqueda no encuentra fragmentos con suficiente similitud, el asistente descarta suposiciones.",
+      "card1Title": "Citas directas con contexto",
+      "card1Text": "Cada afirmación apunta al documento y fragmento original en un acordeón minimalista.",
+      "card1Snippet": "Los colaboradores a tiempo completo tienen derecho a 30 días de vacaciones remuneradas por año civil.",
+      "card2Title": "Búsqueda híbrida avanzada",
+      "card2Text": "Combinación óptima de búsqueda semántica vectorial y búsqueda léxica por palabras clave.",
+      "hybridVector": "Semántica (Vectorial)",
+      "hybridText": "Palabras clave (Texto)",
+      "hybridRerank": "Re-ranking Recíproco"
+    },
+    "control": {
+      "title": "Tú controlas lo que sabe el asistente.",
+      "card1Title": "Aislamiento por asistente",
+      "card1Text": "Cada asistente cuenta con su propia base de conocimiento e historial de conversaciones independiente.",
+      "deptHR": "Recursos Humanos",
+      "deptLegal": "Jurídico",
+      "statusReady": "Listo",
+      "card2Title": "Gestión limpia de archivos",
+      "card2Text": "Sube nuevos manuales o elimina documentos obsoletos de forma segura en un solo clic.",
+      "statusIndexed": "Indexado",
+      "card3Title": "Clave API protegida",
+      "card3Text": "Tu clave de OpenRouter se cifra con AES-256 en el servidor y nunca se expone en el navegador.",
+      "statusEncrypted": "Cifrada",
+      "card4Title": "Multilingüe y adaptable",
+      "card4Text": "Interfaz en portugués, inglés y español con alternancia instantánea entre modo claro y oscuro."
+    },
+    "finalCta": {
+      "title": "Crea tu primer asistente y haz tu primera pregunta.",
+      "button": "Crear mi asistente"
+    },
+    "footer": "SourceMind © 2026 · Plataforma Privada de Asistentes de IA"
   }
 }

@@ -103,7 +103,7 @@ export default function LoginPage() {
           }}
         >
           <div className="brand-mark" style={{ width: "36px", height: "36px", fontSize: "20px" }}>
-            M
+            S
           </div>
           <div style={{ textAlign: "left" }}>
             <div className="brand-name" style={{ fontSize: "18px" }}>

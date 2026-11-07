@@ -268,7 +268,7 @@ html.light .sidebar {
   background: #2b3821;
 }
 
-.nav {
+.sidebar .nav {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -1306,18 +1306,28 @@ html.light .toast {
   background: #fbbf24;
 }
 
-.row-menu {
+.row-menu,
+.doc-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   color: var(--muted);
   background: transparent;
-  font-size: 19px;
-  padding: 4px 7px;
+  padding: 6px;
   border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .row-menu:hover {
   background: var(--panel-hover);
   color: var(--text);
+}
+
+.doc-delete-btn:hover {
+  background: #3b1e1e;
+  color: #f87171;
 }
 
 .upload-zone {
@@ -1676,7 +1686,7 @@ html.light .message.user {
   font-size: 11px;
   font-style: italic;
   line-height: 1.5;
-  white-space: pre-wrap;
+  white-space: normal;
   word-break: break-word;
 }
 
@@ -2021,7 +2031,7 @@ html.light .composer {
 
 
 
-/* ManualMind public landing */
+/* SourceMind public landing */
 .mm-landing {
   min-height: 100vh;
   overflow: hidden;

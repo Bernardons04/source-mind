@@ -101,7 +101,7 @@ export function Sidebar({ currentAssistant, activeView = "assistants" }: Sidebar
         {/* Brand */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Link href="/" className="brand" style={{ padding: "2px 8px" }}>
-            <div className="brand-mark">M</div>
+            <div className="brand-mark">S</div>
             <div>
               <div className="brand-name">{t("brand.name")}</div>
               <div className="brand-sub">{t("brand.tagline")}</div>

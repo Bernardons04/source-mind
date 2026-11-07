@@ -3,7 +3,7 @@ import "@/styles/globals.css";
 import { AppProvider } from "@/lib/context";
 
 export const metadata: Metadata = {
-  title: "ManualMind — Knowledge, made useful.",
+  title: "SourceMind — Knowledge, made useful.",
   description: "AI assistants grounded in private company documents with hybrid RAG and verified citations.",
 };
 

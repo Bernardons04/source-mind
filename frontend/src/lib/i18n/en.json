@@ -1,6 +1,6 @@
 {
   "brand": {
-    "name": "ManualMind",
+    "name": "SourceMind",
     "tagline": "Knowledge, made useful."
   },
   "nav": {
@@ -117,16 +117,120 @@
     "suggestion4": "What is the remote work policy?",
     "suggestion4Sub": "Workplace guidelines",
     "placeholder": "Ask {{assistant}} a question...",
-    "disclaimer": "ManualMind can make mistakes. Check the cited source before relying on an answer.",
+    "disclaimer": "SourceMind can make mistakes. Check the cited source before relying on an answer.",
     "citationsTitle": "Sources & Citations",
     "eventsTitle": "Execution trace (LangGraph)",
     "sending": "Generating answer..."
   },
   "auth": {
-    "signInTitle": "Welcome to ManualMind",
+    "signInTitle": "Welcome to SourceMind",
     "signInSubtitle": "Private AI assistants grounded in your verified documents.",
     "googleButton": "Continue with Google",
     "signingIn": "Redirecting to Google...",
     "tagline": "Enterprise-grade RAG with real citations and zero hallucination tolerance."
+  },
+  "landing": {
+    "nav": {
+      "how": "How it works",
+      "confidence": "Confidence",
+      "cta": "Get started",
+      "workspace": "Open Workspace",
+      "menuWorkspace": "Workspace",
+      "menuLogout": "Logout",
+      "accountFallback": "Your account"
+    },
+    "hero": {
+      "badge": "Answers with source, always",
+      "titleBefore": "Every answer points to the page ",
+      "titleHighlight": "where it came from.",
+      "lead": "SourceMind creates private assistants to query your manuals, policies, and contracts. If documents don't have the information, the assistant says so.",
+      "ctaPrimary": "Create my assistant",
+      "ctaSecondary": "See how it works"
+    },
+    "how": {
+      "title": "From file to answer in four steps.",
+      "step1Title": "1. Create an assistant",
+      "step1Desc": "Give it a name and connect your OpenRouter key. Each assistant has its own base and history.",
+      "step2Title": "2. Upload documents",
+      "step2Desc": "Add PDF, DOCX, or TXT files with clean extraction and vector indexing.",
+      "step3Title": "3. Ask a question",
+      "step3Desc": "Write in natural language. Search combines semantics and exact keywords.",
+      "step4Title": "4. Verify the source",
+      "step4Desc": "Answers come with document, page, and original snippet in a dedicated accordion."
+    },
+    "mock": {
+      "question": "How many vacation days do I have?",
+      "answer": "Full-time employees receive 30 paid vacation days per year.",
+      "docPdf": "Employee Handbook.pdf",
+      "page14": "Page 14",
+      "citations": "Sources and citations",
+      "item1": "Full-time employees are entitled to 30 paid vacation days per calendar year.",
+      "item2": "Unused vacation days may be carried over until March 31 of the following year with manager approval.",
+      "badgeVerified": "Verified citation",
+      "badgeNoEvidence": "Insufficient evidence",
+      "badgeIndexed": "Indexed document",
+      "hybridSearch": "Hybrid search",
+      "sufficientEvidence": "Sufficient evidence",
+      "disclaimer": "Real SourceMind interface screens. The floating answer is an illustrative mockup with sample data."
+    },
+    "problem": {
+      "title": "Today, answers are scattered across files.",
+      "lead1": "The main rule is in a PDF, the exception in another document, and the latest update in someone's inbox. Searching file by file wastes time, and generic AI forces you to trust answers no one can verify.",
+      "lead2": "With SourceMind, each assistant only reads what you upload and answers strictly from those files, citing the exact source.",
+      "query": "How many vacation days do I have?",
+      "doc1Name": "Employee Handbook.pdf",
+      "doc1Text": "Full-time employees are entitled to 30 paid vacation days per calendar year.",
+      "doc2Name": "Vacation Policy.docx",
+      "doc2Text": "Unused vacation days may be carried over until March 31 of the following year with manager approval.",
+      "doc3Name": "Remote Work Policy.docx",
+      "doc3Text": "Remote work is permitted up to three days per week at manager discretion.",
+      "doc4Name": "Vendor Agreement.pdf",
+      "doc4Text": "Invoice payment must be completed within 30 days of receipt.",
+      "doc4Note": "Mentions “30 days” as well, but about a different topic.",
+      "ans1": "Full-time employees receive 30 paid vacation days per year.",
+      "ans2": "Unused days may be carried over until March 31 with manager approval.",
+      "src1": "1 Employee Handbook.pdf, page 14",
+      "src2": "2 Vacation Policy.docx, section 3.2",
+      "step1": "1. You ask a question in natural language.",
+      "step2": "2. The assistant reads your files and extracts only matching snippets. Unrelated files stay out.",
+      "step3": "3. The answer is returned with direct citations for you to verify."
+    },
+    "confidence": {
+      "title": "Engineered to say “I don't know”.",
+      "subtitle": "An answer is only reliable if you can verify it. Without a supporting snippet, the assistant honestly abstains instead of inventing data.",
+      "abstQuery": "What is the parental leave policy for contractors?",
+      "abstBadge": "Insufficient evidence",
+      "abstText": "I could not find sufficient evidence in the indexed documents to answer this question. Please upload the relevant policy or rephrase your question.",
+      "abstNote": "Strict relevance threshold: if retrieval does not find sufficient similarity, the assistant rejects speculation.",
+      "card1Title": "Direct citations with context",
+      "card1Text": "Every claim points directly to the document and original excerpt in a minimalist accordion.",
+      "card1Snippet": "Full-time employees are entitled to 30 paid vacation days per calendar year.",
+      "card2Title": "Advanced hybrid search",
+      "card2Text": "Seamless combination of vector semantic search and keyword lexical matching.",
+      "hybridVector": "Semantic (Vector)",
+      "hybridText": "Keywords (Lexical)",
+      "hybridRerank": "Reciprocal Reranking"
+    },
+    "control": {
+      "title": "You control what the assistant knows.",
+      "card1Title": "Isolated per assistant",
+      "card1Text": "Each assistant has its own dedicated knowledge base and independent chat history.",
+      "deptHR": "Human Resources",
+      "deptLegal": "Legal",
+      "statusReady": "Ready",
+      "card2Title": "Clean file management",
+      "card2Text": "Upload new manuals or remove obsolete documents with one-click safe deletion.",
+      "statusIndexed": "Indexed",
+      "card3Title": "Protected API keys",
+      "card3Text": "Your OpenRouter key is encrypted with AES-256 on the server and never exposed to the browser.",
+      "statusEncrypted": "Encrypted",
+      "card4Title": "Multilingual and adaptable",
+      "card4Text": "Interface in Portuguese, English, and Spanish with instant light and dark mode switching."
+    },
+    "finalCta": {
+      "title": "Create your first assistant and ask your first question.",
+      "button": "Create my assistant"
+    },
+    "footer": "SourceMind © 2026 · Private AI Assistant Platform"
   }
 }

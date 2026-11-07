@@ -1,6 +1,6 @@
 {
   "brand": {
-    "name": "ManualMind",
+    "name": "SourceMind",
     "tagline": "Conhecimento que faz sentido."
   },
   "nav": {
@@ -117,16 +117,120 @@
     "suggestion4": "Qual é a política de trabalho remoto?",
     "suggestion4Sub": "Diretrizes de trabalho",
     "placeholder": "Faça uma pergunta para {{assistant}}...",
-    "disclaimer": "O ManualMind pode cometer erros. Verifique a fonte citada antes de tomar decisões.",
+    "disclaimer": "O SourceMind pode cometer erros. Verifique a fonte citada antes de tomar decisões.",
     "citationsTitle": "Fontes e Citações",
     "eventsTitle": "Rastreamento da execução (LangGraph)",
     "sending": "Gerando resposta..."
   },
   "auth": {
-    "signInTitle": "Bem-vindo ao ManualMind",
+    "signInTitle": "Bem-vindo ao SourceMind",
     "signInSubtitle": "Assistentes de IA privados fundamentados em seus documentos verificados.",
     "googleButton": "Continuar com o Google",
     "signingIn": "Redirecionando para o Google...",
     "tagline": "RAG de alta confiabilidade com citações reais e tolerância zero a alucinações."
+  },
+  "landing": {
+    "nav": {
+      "how": "Como funciona",
+      "confidence": "Confiança",
+      "cta": "Começar",
+      "workspace": "Acessar Workspace",
+      "menuWorkspace": "Workspace",
+      "menuLogout": "Logout",
+      "accountFallback": "Sua conta"
+    },
+    "hero": {
+      "badge": "Respostas com fonte, sempre",
+      "titleBefore": "Cada resposta aponta para a página ",
+      "titleHighlight": "de onde veio.",
+      "lead": "O SourceMind cria assistentes privados para consultar seus manuais, políticas e contratos. Se os documentos não trazem a informação, o assistente diz isso.",
+      "ctaPrimary": "Criar meu assistente",
+      "ctaSecondary": "Ver como funciona"
+    },
+    "how": {
+      "title": "Do arquivo à resposta em quatro passos.",
+      "step1Title": "1. Crie um assistente",
+      "step1Desc": "Dê um nome e conecte sua chave OpenRouter. Cada assistente tem sua própria base e histórico.",
+      "step2Title": "2. Envie os documentos",
+      "step2Desc": "Adicione arquivos PDF, DOCX ou TXT com extração limpa e indexação vetorial.",
+      "step3Title": "3. Faça uma pergunta",
+      "step3Desc": "Escreva em linguagem natural. A busca combina semântica e palavras-chave.",
+      "step4Title": "4. Confira a fonte",
+      "step4Desc": "A resposta vem com o documento, página e trecho original em um accordion dedicado."
+    },
+    "mock": {
+      "question": "Quantos dias de férias eu tenho?",
+      "answer": "Colaboradores em tempo integral têm 30 dias de férias remuneradas por ano.",
+      "docPdf": "Manual do Colaborador.pdf",
+      "page14": "Página 14",
+      "citations": "Fontes e citações",
+      "item1": "Colaboradores em tempo integral têm direito a 30 dias de férias remuneradas por ano civil.",
+      "item2": "Os dias de férias não utilizados podem ser transferidos até 31 de março do ano seguinte, mediante aprovação do gestor.",
+      "badgeVerified": "Citação verificada",
+      "badgeNoEvidence": "Sem evidência suficiente",
+      "badgeIndexed": "Documento indexado",
+      "hybridSearch": "Busca híbrida",
+      "sufficientEvidence": "Evidência suficiente",
+      "disclaimer": "Telas reais do SourceMind. A resposta flutuante é um exemplo ilustrativo com dados fictícios."
+    },
+    "problem": {
+      "title": "Hoje a resposta está espalhada em vários arquivos.",
+      "lead1": "A regra está num PDF, a exceção em outro documento e a versão atual na caixa de entrada de alguém. Procurar arquivo por arquivo toma tempo, e perguntar a uma IA genérica obriga você a confiar em algo que ninguém consegue conferir.",
+      "lead2": "No SourceMind, cada assistente lê só os documentos que você adicionou e responde a partir deles, com a fonte ao lado.",
+      "query": "Quantos dias de férias eu tenho?",
+      "doc1Name": "Manual do Colaborador.pdf",
+      "doc1Text": "Colaboradores em tempo integral têm direito a 30 dias de férias remuneradas por ano civil.",
+      "doc2Name": "Política de Férias.docx",
+      "doc2Text": "Os dias de férias não utilizados podem ser transferidos até 31 de março do ano seguinte, mediante aprovação do gestor.",
+      "doc3Name": "Política de Trabalho Remoto.docx",
+      "doc3Text": "O trabalho remoto é permitido até três dias por semana, a critério da equipe.",
+      "doc4Name": "Contrato de Fornecedor.pdf",
+      "doc4Text": "O pagamento das faturas deve ser feito em até 30 dias após o recebimento.",
+      "doc4Note": "Também cita “30 dias”, mas é outro assunto.",
+      "ans1": "Colaboradores em tempo integral têm 30 dias de férias remuneradas por ano.",
+      "ans2": "Dias não utilizados podem ser transferidos até 31 de março, com aprovação do gestor.",
+      "src1": "1 Manual do Colaborador.pdf, página 14",
+      "src2": "2 Política de Férias.docx, seção 3.2",
+      "step1": "1. Você faz uma pergunta em linguagem natural.",
+      "step2": "2. O assistente lê seus arquivos e separa só os trechos que respondem. Documentos irrelevantes ficam de fora.",
+      "step3": "3. A resposta sai com a fonte de cada trecho para você conferir."
+    },
+    "confidence": {
+      "title": "Feito para dizer “não sei”.",
+      "subtitle": "Uma resposta só vale se você puder conferi-la. Sem trecho que a sustente, o assistente se abstém honestamente em vez de inventar dados.",
+      "abstQuery": "Qual é a política de licença parental para prestadores de serviço?",
+      "abstBadge": "Sem evidência suficiente",
+      "abstText": "Não encontrei evidências suficientes nos documentos indexados para responder a esta pergunta. Adicione os documentos pertinentes ou reformule sua pergunta.",
+      "abstNote": "Critério estrito de relevância: se a busca não encontrar trechos com similaridade suficiente, o assistente rejeita suposições.",
+      "card1Title": "Citações diretas com contexto",
+      "card1Text": "Cada afirmação aponta para o documento e trecho original em um accordion minimalista.",
+      "card1Snippet": "Colaboradores em tempo integral têm direito a 30 dias de férias remuneradas por ano civil.",
+      "card2Title": "Busca híbrida avançada",
+      "card2Text": "Combinação de busca semântica vetorial e busca textual de palavras-chave.",
+      "hybridVector": "Semântica (Vetorial)",
+      "hybridText": "Palavras-chave (Texto)",
+      "hybridRerank": "Re-ranking Recíproco"
+    },
+    "control": {
+      "title": "Você controla o que o assistente sabe.",
+      "card1Title": "Isolamento por assistente",
+      "card1Text": "Cada assistente tem sua própria base de conhecimento e histórico de conversas independente.",
+      "deptHR": "Recursos Humanos",
+      "deptLegal": "Jurídico",
+      "statusReady": "Pronto",
+      "card2Title": "Gestão limpa de arquivos",
+      "card2Text": "Envie novos manuais ou remova documentos obsoletos com exclusão segura em um clique.",
+      "statusIndexed": "Indexado",
+      "card3Title": "Chave de API protegida",
+      "card3Text": "Sua chave do OpenRouter é criptografada com AES-256 no servidor e nunca exposta ao navegador.",
+      "statusEncrypted": "Criptografada",
+      "card4Title": "Multilíngue e adaptável",
+      "card4Text": "Interface em português, inglês e espanhol com alternância instantânea entre modo claro e escuro."
+    },
+    "finalCta": {
+      "title": "Crie seu primeiro assistente e faça a primeira pergunta.",
+      "button": "Criar meu assistente"
+    },
+    "footer": "SourceMind © 2026 · Plataforma Privada de Assistentes de IA"
   }
 }
