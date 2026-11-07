@@ -52,8 +52,8 @@ class OpenRouterClient:
     def _headers(self) -> Dict[str, str]:
         return {
             "Authorization": f"Bearer {self.api_key}",
-            "HTTP-Referer": "https://manualmind.local",
-            "X-Title": "ManualMind",
+            "HTTP-Referer": "https://sourcemind.local",
+            "X-Title": "SourceMind",
             "Content-Type": "application/json",
         }
 

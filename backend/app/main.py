@@ -11,13 +11,13 @@ from app.api.preferences import router as preferences_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup actions
-    print(f"ManualMind Backend initialized. CORS origins: {settings.cors_origin_list}")
+    print(f"SourceMind Backend initialized. CORS origins: {settings.cors_origin_list}")
     yield
     # Shutdown actions
 
 
 app = FastAPI(
-    title="ManualMind API",
+    title="SourceMind API",
     description="Grounded AI Assistant platform with hybrid RAG and document knowledge bases",
     version="1.0.0",
     lifespan=lifespan,
@@ -40,4 +40,4 @@ app.include_router(preferences_router, prefix="/api")
 
 @app.get("/api/health")
 async def health_check():
-    return {"status": "healthy", "service": "manualmind-backend"}
+    return {"status": "healthy", "service": "sourcemind-backend"}

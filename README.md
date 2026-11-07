@@ -1,6 +1,6 @@
-# ManualMind — Private AI Assistant Platform
+# SourceMind — Private AI Assistant Platform
 
-ManualMind is a web application of grounded AI assistants that answer questions based strictly on users' private documents. Every response is anchored in real evidence retrieved through hybrid search (semantic similarity + lexical search), with verifiable citations, zero-hallucination abstention policies, document versioning, and observable LangGraph execution traces.
+SourceMind is a web application of grounded AI assistants that answer questions based strictly on users' private documents. Every response is anchored in real evidence retrieved through hybrid search (semantic similarity + lexical search), with verifiable citations, zero-hallucination abstention policies, document versioning, and observable LangGraph execution traces.
 
 ---
 
