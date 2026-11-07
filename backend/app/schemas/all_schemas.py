@@ -14,6 +14,7 @@ class AssistantCreate(BaseModel):
 
 class AssistantUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=255)
+    slug: Optional[str] = Field(None, min_length=1, max_length=100, pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
     openrouter_api_key: Optional[str] = None
     instructions: Optional[Dict[str, Any]] = None
 
@@ -47,6 +48,10 @@ class DocumentResponse(BaseModel):
 # --- Chats & Messages ---
 class ChatCreate(BaseModel):
     title: Optional[str] = "New Chat"
+
+
+class ChatUpdate(BaseModel):
+    title: str = Field(..., min_length=1, max_length=255)
 
 
 class ChatResponse(BaseModel):

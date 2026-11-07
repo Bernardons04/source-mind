@@ -7,24 +7,31 @@ from sqlalchemy.orm import selectinload
 from app.database import get_db
 from app.auth.dependencies import get_current_user
 from app.auth.jwt import AuthenticatedUser
-from app.models.all_models import Assistant, Chat, Message, MessageEvent, MessageCitation, DocumentChunk
+from app.models.all_models import Assistant, Chat, Document, Message, MessageEvent, MessageCitation, DocumentChunk
 from app.schemas.all_schemas import (
     ChatCreate,
+    ChatUpdate,
     ChatResponse,
     MessageCreate,
     MessageResponse,
     MessageCitationResponse,
     MessageEventResponse,
 )
-from app.services.crypto import decrypt_api_key
+from app.services.crypto import decrypt_api_key, InvalidAssistantKeyError
 from app.services.openrouter import OpenRouterClient
-from app.services.rag_workflow import rag_workflow
+from app.services.rag_workflow import run_agent
 
 router = APIRouter(prefix="/assistants/{slug}/chats", tags=["chats"])
 
 
 async def _get_user_assistant(slug: str, user: AuthenticatedUser, db: AsyncSession) -> Assistant:
-    stmt = select(Assistant).where(and_(Assistant.user_id == user.id, Assistant.slug == slug))
+    stmt = select(Assistant).where(
+        and_(
+            Assistant.user_id == user.id,
+            Assistant.slug == slug,
+            Assistant.deletion_status == "active",
+        )
+    )
     res = await db.execute(stmt)
     assistant = res.scalars().first()
     if not assistant:
@@ -158,7 +165,7 @@ async def send_message(
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Sends a question, executes the LangGraph RAG workflow with hybrid search,
+    Sends a question, executes the LangGraph agent-loop workflow with hybrid search,
     persists citations and execution events, and returns the grounded answer.
     """
     assistant = await _get_user_assistant(slug, user, db)
@@ -179,10 +186,13 @@ async def send_message(
     await db.commit()
     await db.refresh(user_msg)
 
-    # 2. Retrieve recent message history
+    # 2. Retrieve recent message history (user/assistant only — no tool messages)
     history_stmt = (
         select(Message)
-        .where(Message.chat_id == chat.id)
+        .where(
+            Message.chat_id == chat.id,
+            Message.role.in_(["user", "assistant"]),
+        )
         .order_by(Message.created_at.desc())
         .limit(6)
     )
@@ -190,65 +200,90 @@ async def send_message(
     recent_msgs = list(reversed(history_res.scalars().all()))
     chat_history = [{"role": m.role, "content": m.content} for m in recent_msgs]
 
-    # 3. Prepare OpenRouter client with decrypted assistant key
-    plain_key = decrypt_api_key(assistant.openrouter_api_key_encrypted)
+    # 3. Query indexed documents for this assistant
+    docs_stmt = select(Document.name).where(
+        Document.assistant_id == assistant.id,
+        Document.processing_status == "indexed",
+    )
+    doc_names = list((await db.execute(docs_stmt)).scalars().all())
+
+    # 4. Prepare OpenRouter client with decrypted assistant key
+    try:
+        plain_key = decrypt_api_key(assistant.openrouter_api_key_encrypted)
+    except InvalidAssistantKeyError as key_err:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "A chave da API OpenRouter deste assistente é inválida ou incompatível com a chave de criptografia atual do servidor. "
+                "Por favor, atualize a chave do assistente em Configurações."
+            ),
+        ) from key_err
+
     openrouter = OpenRouterClient(api_key=plain_key)
 
-    # 4. Initialize LangGraph State and invoke workflow
-    initial_state = {
-        "query": payload.content.strip(),
-        "assistant_id": str(assistant.id),
-        "assistant_name": assistant.name,
-        "instructions": assistant.instructions or {},
-        "chat_history": chat_history,
-        "db": db,
-        "openrouter": openrouter,
-        "sequence": 0,
-        "events": [],
-        "analyzed_keywords": [],
-        "retrieved_chunks": [],
-        "is_sufficient": False,
-        "has_contradiction": False,
-        "abstention_reason": None,
-        "response_text": "",
-        "citations": [],
-    }
+    # 5. Extract custom instructions from assistant config
+    instructions = assistant.instructions or {}
+    custom_instructions = instructions.get("prompt", "") if isinstance(instructions, dict) else ""
 
-    final_state = await rag_workflow.ainvoke(initial_state)
+    # 6. Run the agent-loop workflow
+    result = await run_agent(
+        query=payload.content.strip(),
+        assistant_id=str(assistant.id),
+        assistant_name=assistant.name,
+        indexed_documents=doc_names,
+        chat_history=chat_history,
+        db=db,
+        openrouter=openrouter,
+        custom_instructions=custom_instructions,
+    )
 
-    # 5. Persist Assistant Message
+    # 7. Persist Assistant Message, Citations, and Events in a SINGLE transaction
+    # Flush first to obtain the generated message ID without committing prematurely
     assistant_msg = Message(
         chat_id=chat.id,
         role="assistant",
-        content=final_state.get("response_text", ""),
+        content=result.get("answer", ""),
     )
     db.add(assistant_msg)
-    await db.commit()
-    await db.refresh(assistant_msg)
+    await db.flush()
 
-    # 6. Persist Citations
+    # 8. Prepare Citations — ALL retrieved chunks (deduplicated by chunk_id)
     created_citations = []
-    for c in final_state.get("citations", []):
+    seen_chunk_ids: set = set()
+    for chunk in result.get("retrieved_chunks", []):
+        if chunk.chunk_id in seen_chunk_ids:
+            continue
+        seen_chunk_ids.add(chunk.chunk_id)
         try:
-            chunk_uuid = uuid.UUID(c["chunk_id"])
+            chunk_uuid = uuid.UUID(chunk.chunk_id)
             citation_metadata = {
-                **(c.get("metadata") or {}),
-                "document_name": c.get("document_name", "Document"),
+                "document_id": chunk.document_id,
+                "document_name": chunk.document_name,
+                "page": chunk.page,
+                "page_end": chunk.page_end,
+                "retrieval_source": chunk.retrieval_source,
+                "rrf_score": chunk.rrf_score,
+                "semantic_score": chunk.semantic_score,
+                "lexical_score": chunk.lexical_score,
+                "source_type": "retrieved_chunk",
             }
             db_cit = MessageCitation(
                 message_id=assistant_msg.id,
                 document_chunk_id=chunk_uuid,
-                quote=c["quote"],
+                quote=chunk.content[:300],
                 metadata_=citation_metadata,
             )
             db.add(db_cit)
             created_citations.append(db_cit)
         except Exception as e:
-            print(f"Citation persistence note: {e}")
+            import logging
+            logging.getLogger("manualmind.chats").warning(
+                "Skipping citation for chunk_id=%r: %s", chunk.chunk_id, e
+            )
 
-    # 7. Persist Structured Execution Events
+    # 9. Prepare Structured Execution Events
     created_events = []
-    for ev in final_state.get("events", []):
+    for ev in result.get("events", []):
         db_ev = MessageEvent(
             message_id=assistant_msg.id,
             sequence_number=ev["sequence_number"],
@@ -258,9 +293,10 @@ async def send_message(
         db.add(db_ev)
         created_events.append(db_ev)
 
+    # Atomic commit for message, citations, and events together
     await db.commit()
 
-    # Re-fetch for clean response
+    # Re-fetch citations for clean response (IDs are populated after commit)
     return MessageResponse(
         id=assistant_msg.id,
         chat_id=assistant_msg.chat_id,
@@ -288,6 +324,29 @@ async def send_message(
             )
             for e in created_events
         ],
+    )
+
+
+@router.patch("/{chat_id}", response_model=ChatResponse)
+async def update_chat(
+    slug: str,
+    chat_id: uuid.UUID,
+    payload: ChatUpdate,
+    user: AuthenticatedUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Updates chat title."""
+    assistant = await _get_user_assistant(slug, user, db)
+    chat = await _get_user_chat(chat_id, assistant.id, db)
+    chat.title = payload.title.strip()
+    await db.commit()
+    await db.refresh(chat)
+    return ChatResponse(
+        id=chat.id,
+        assistant_id=chat.assistant_id,
+        title=chat.title,
+        created_at=chat.created_at,
+        updated_at=chat.updated_at,
     )
 
 

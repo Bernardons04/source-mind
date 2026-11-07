@@ -187,24 +187,47 @@ class OpenRouterClient:
 
     async def chat_completion(
         self,
-        messages: List[Dict[str, str]],
+        messages: List[Dict[str, Any]],
         model: str = settings.DEFAULT_CHAT_MODEL,
         temperature: float = 0.2,
         max_tokens: int = 2000,
-    ) -> str:
+        tools: Optional[List[Dict[str, Any]]] = None,
+        response_format: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """
         Calls OpenRouter Chat Completions API with safe error handling.
+
+        Returns the full ``choices[0]`` dict so callers can access both
+        ``message.content`` and ``message.tool_calls``.
+
+        When ``tools`` is provided the model may respond with tool_calls instead
+        of plain text. When ``response_format`` is provided (e.g. JSON Schema)
+        the model is instructed to produce structured output.
+
+        Raises:
+            HTTPException: For HTTP 401, 429, and other non-200 responses.
+            OpenRouterTransientError: For transport-level failures (timeout, connect).
+            OpenRouterInvalidResponseError: For malformed JSON in the response body.
         """
         url = f"{OPENROUTER_BASE_URL}/chat/completions"
-        payload = {
+        payload: Dict[str, Any] = {
             "model": model,
             "messages": messages,
             "temperature": temperature,
             "max_tokens": max_tokens,
         }
+        if tools:
+            payload["tools"] = tools
+        if response_format:
+            payload["response_format"] = response_format
 
-        async with httpx.AsyncClient(timeout=90.0) as client:
-            resp = await client.post(url, json=payload, headers=self._headers())
+        try:
+            async with httpx.AsyncClient(timeout=90.0) as client:
+                resp = await client.post(url, json=payload, headers=self._headers())
+        except httpx.TransportError as net_err:
+            raise OpenRouterTransientError(
+                f"Falha de transporte/timeout no OpenRouter ({type(net_err).__name__}): {net_err}"
+            ) from net_err
 
         if resp.status_code == 401:
             raise HTTPException(
@@ -222,8 +245,14 @@ class OpenRouterClient:
                 detail=f"OpenRouter error ({resp.status_code}): {resp.text[:300]}",
             )
 
-        data = resp.json()
+        try:
+            data = resp.json()
+        except Exception as json_err:
+            raise OpenRouterInvalidResponseError(
+                f"Resposta do OpenRouter (chat) não é um JSON válido: {json_err}"
+            ) from json_err
+
         choices = data.get("choices", [])
         if not choices:
-            return ""
-        return choices[0].get("message", {}).get("content", "")
+            return {"message": {"content": "", "tool_calls": None}}
+        return choices[0]

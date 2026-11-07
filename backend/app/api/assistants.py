@@ -138,6 +138,20 @@ async def update_assistant(
 
     if payload.name is not None:
         assistant.name = payload.name.strip()
+    if payload.slug is not None:
+        new_slug = payload.slug.strip().lower()
+        if new_slug != assistant.slug:
+            # Check uniqueness for this user
+            conflict_stmt = select(Assistant).where(
+                and_(Assistant.user_id == user.id, Assistant.slug == new_slug, Assistant.id != assistant.id)
+            )
+            conflict_res = await db.execute(conflict_stmt)
+            if conflict_res.scalars().first():
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=f"An assistant with URL identifier '{new_slug}' already exists in your workspace.",
+                )
+            assistant.slug = new_slug
     if payload.instructions is not None:
         assistant.instructions = payload.instructions
     if payload.openrouter_api_key:
