@@ -115,7 +115,7 @@ export const api = {
 
   async updateAssistant(
     slug: string,
-    data: { name?: string; instructions?: Record<string, any>; openrouter_api_key?: string }
+    data: { name?: string; slug?: string; instructions?: Record<string, any>; openrouter_api_key?: string }
   ): Promise<Assistant> {
     const authHeaders = await getAuthHeader();
     const res = await fetch(`${API_BASE}/assistants/${slug}`, {
@@ -238,6 +238,17 @@ export const api = {
       headers: authHeaders,
     });
     if (!res.ok) throw new Error(await res.text());
+  },
+
+  async updateChat(slug: string, chatId: string, data: { title: string }): Promise<Chat> {
+    const authHeaders = await getAuthHeader();
+    const res = await fetch(`${API_BASE}/assistants/${slug}/chats/${chatId}`, {
+      method: "PATCH",
+      headers: { ...authHeaders, "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
   },
 
   // Preferences

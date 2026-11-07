@@ -16,7 +16,8 @@
     "markdown-it": "^15.0.3",
     "next": "^14.2.25",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "sweetalert2": "^11.26.25"
   },
   "devDependencies": {
     "@types/node": "^22.8.1",

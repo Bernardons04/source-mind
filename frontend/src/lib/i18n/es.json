@@ -47,7 +47,36 @@
     "hide": "Ocultar",
     "cancel": "Cancelar",
     "submit": "Crear asistente",
-    "submitting": "Creando..."
+    "submitting": "Creando...",
+    "customInstructionsLabel": "Instrucciones personalizadas (Opcional)",
+    "customInstructionsPlaceholder": "ej. Responde siempre con formalidad, concéntrate en las políticas internas..."
+  },
+  "editModal": {
+    "title": "Configuración del asistente",
+    "subtitle": "Actualiza el nombre, el identificador de URL, la clave de API y las instrucciones.",
+    "keyHelp": "Deja en blanco para conservar la clave actual. Si se proporciona, se cifrará y reemplazará a la anterior.",
+    "customInstructionsLabel": "Instrucciones personalizadas",
+    "customInstructionsPlaceholder": "ej. Directrices de comportamiento para las respuestas de este asistente...",
+    "submit": "Guardar cambios",
+    "submitting": "Guardando...",
+    "success": "¡Asistente \"{{name}}\" actualizado con éxito!",
+    "deleteTitle": "¿Eliminar asistente?",
+    "deleteText": "¿Estás seguro de que deseas eliminar el asistente \"{{name}}\"? Se eliminarán todos los documentos y datos asociados.",
+    "deleteConfirm": "Sí, eliminar",
+    "deleteSuccess": "Asistente \"{{name}}\" eliminado con éxito."
+  },
+  "sidebarActions": {
+    "renameTitle": "Renombrar conversación",
+    "renamePlaceholder": "Nuevo título de la conversación",
+    "renameValidation": "El título no puede estar vacío",
+    "renameSave": "Guardar",
+    "renameCancel": "Cancelar",
+    "deleteTitle": "¿Eliminar conversación?",
+    "deleteText": "¿Estás seguro de que deseas eliminar \"{{title}}\"?",
+    "deleteConfirm": "Sí, eliminar",
+    "deleteCancel": "Cancelar",
+    "renameBtn": "Renombrar",
+    "deleteBtn": "Eliminar"
   },
   "knowledge": {
     "eyebrow": "Base de conocimiento",

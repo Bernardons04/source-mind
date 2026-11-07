@@ -117,50 +117,13 @@ export function ChatInterface({
       <div className="conversation" id="conversation">
         <div className="chat-content">
           {showWelcome && (
-            <>
-              <div className="welcome" id="welcomeBlock">
-                <div className="welcome-mark">
-                  <Sparkles size={28} strokeWidth={1.5} />
-                </div>
-                <h2>{t("chat.welcomeTitle")}</h2>
-                <p>{t("chat.welcomeSubtitle")}</p>
+            <div className="welcome" id="welcomeBlock">
+              <div className="welcome-mark">
+                <Sparkles size={28} strokeWidth={1.5} />
               </div>
-
-              <div className="suggestions" id="suggestions">
-                <button
-                  type="button"
-                  className="suggestion"
-                  onClick={() => handleSendMessage(t("chat.suggestion1"))}
-                >
-                  {t("chat.suggestion1")}
-                  <span>{t("chat.suggestion1Sub")}</span>
-                </button>
-                <button
-                  type="button"
-                  className="suggestion"
-                  onClick={() => handleSendMessage(t("chat.suggestion2"))}
-                >
-                  {t("chat.suggestion2")}
-                  <span>{t("chat.suggestion2Sub")}</span>
-                </button>
-                <button
-                  type="button"
-                  className="suggestion"
-                  onClick={() => handleSendMessage(t("chat.suggestion3"))}
-                >
-                  {t("chat.suggestion3")}
-                  <span>{t("chat.suggestion3Sub")}</span>
-                </button>
-                <button
-                  type="button"
-                  className="suggestion"
-                  onClick={() => handleSendMessage(t("chat.suggestion4"))}
-                >
-                  {t("chat.suggestion4")}
-                  <span>{t("chat.suggestion4Sub")}</span>
-                </button>
-              </div>
-            </>
+              <h2>{t("chat.welcomeTitle")}</h2>
+              <p>{t("chat.welcomeSubtitle")}</p>
+            </div>
           )}
 
           {/* Message Stream */}
@@ -168,17 +131,17 @@ export function ChatInterface({
             {messages.map((m) => (
               <div key={m.id} className={`message ${m.role}`}>
                 {m.role === "assistant" ? (
-                  <div
-                    className="markdown-body"
-                    dangerouslySetInnerHTML={{ __html: md.render(m.content) }}
-                  />
+                  <>
+                    {m.citations && m.citations.length > 0 && (
+                      <CitationsList citations={m.citations} />
+                    )}
+                    <div
+                      className="markdown-body"
+                      dangerouslySetInnerHTML={{ __html: md.render(m.content) }}
+                    />
+                  </>
                 ) : (
                   <div style={{ whiteSpace: "pre-wrap" }}>{m.content}</div>
-                )}
-
-                {/* Citations */}
-                {m.citations && m.citations.length > 0 && (
-                  <CitationsList citations={m.citations} />
                 )}
               </div>
             ))}

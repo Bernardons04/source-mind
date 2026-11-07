@@ -47,7 +47,36 @@
     "hide": "Hide",
     "cancel": "Cancel",
     "submit": "Create assistant",
-    "submitting": "Creating..."
+    "submitting": "Creating...",
+    "customInstructionsLabel": "Custom instructions (Optional)",
+    "customInstructionsPlaceholder": "e.g. Always respond formally, focus on company policies..."
+  },
+  "editModal": {
+    "title": "Assistant settings",
+    "subtitle": "Update name, URL identifier, API key, and instructions.",
+    "keyHelp": "Leave blank to keep the current key. If provided, the new key will be encrypted and replace the previous one.",
+    "customInstructionsLabel": "Custom instructions",
+    "customInstructionsPlaceholder": "e.g. Behavior guidelines and directives for this assistant...",
+    "submit": "Save changes",
+    "submitting": "Saving...",
+    "success": "Assistant \"{{name}}\" updated successfully!",
+    "deleteTitle": "Delete assistant?",
+    "deleteText": "Are you sure you want to delete \"{{name}}\"? All associated documents and data will be permanently removed.",
+    "deleteConfirm": "Yes, delete",
+    "deleteSuccess": "Assistant \"{{name}}\" deleted successfully."
+  },
+  "sidebarActions": {
+    "renameTitle": "Rename conversation",
+    "renamePlaceholder": "New conversation title",
+    "renameValidation": "Title cannot be empty",
+    "renameSave": "Save",
+    "renameCancel": "Cancel",
+    "deleteTitle": "Delete conversation?",
+    "deleteText": "Are you sure you want to delete \"{{title}}\"?",
+    "deleteConfirm": "Yes, delete",
+    "deleteCancel": "Cancel",
+    "renameBtn": "Rename",
+    "deleteBtn": "Delete"
   },
   "knowledge": {
     "eyebrow": "Knowledge base",

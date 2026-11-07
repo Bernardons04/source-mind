@@ -47,7 +47,36 @@
     "hide": "Ocultar",
     "cancel": "Cancelar",
     "submit": "Criar assistente",
-    "submitting": "Criando..."
+    "submitting": "Criando...",
+    "customInstructionsLabel": "Instruções personalizadas (Opcional)",
+    "customInstructionsPlaceholder": "ex: Responda sempre em português formal, concentre-se nas políticas de RH..."
+  },
+  "editModal": {
+    "title": "Configurações do assistente",
+    "subtitle": "Atualize o nome, o identificador da URL, a chave de API e as instruções.",
+    "keyHelp": "Deixe em branco para manter a chave atual. Se fornecida, a nova chave será criptografada e substituirá a anterior.",
+    "customInstructionsLabel": "Instruções personalizadas",
+    "customInstructionsPlaceholder": "ex: Instruções de comportamento e diretrizes para as respostas deste assistente...",
+    "submit": "Salvar alterações",
+    "submitting": "Salvando...",
+    "success": "Assistente \"{{name}}\" atualizado com sucesso!",
+    "deleteTitle": "Excluir assistente?",
+    "deleteText": "Tem certeza de que deseja excluir o assistente \"{{name}}\"? Todos os documentos e dados associados serão removidos.",
+    "deleteConfirm": "Sim, excluir",
+    "deleteSuccess": "Assistente \"{{name}}\" excluído com sucesso."
+  },
+  "sidebarActions": {
+    "renameTitle": "Renomear conversa",
+    "renamePlaceholder": "Novo título da conversa",
+    "renameValidation": "O título não pode ser vazio",
+    "renameSave": "Salvar",
+    "renameCancel": "Cancelar",
+    "deleteTitle": "Excluir conversa?",
+    "deleteText": "Tem certeza de que deseja excluir \"{{title}}\"?",
+    "deleteConfirm": "Sim, excluir",
+    "deleteCancel": "Cancelar",
+    "renameBtn": "Renomear",
+    "deleteBtn": "Excluir"
   },
   "knowledge": {
     "eyebrow": "Base de conhecimento",

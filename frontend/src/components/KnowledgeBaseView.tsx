@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useApp } from "@/lib/context";
 import { api, Assistant, DocumentItem } from "@/lib/api";
+import { modalSwal } from "@/lib/swal";
 import {
   ArrowLeft,
   Plus,
@@ -84,10 +85,15 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
     for (const file of files) {
       const exists = documents.some((d) => d.name.toLowerCase() === file.name.toLowerCase());
       if (exists) {
-        const proceed = window.confirm(
-          `Um documento com o nome "${file.name}" já existe nesta base de conhecimento. Deseja enviar assim mesmo como um novo documento?`
-        );
-        if (!proceed) {
+        const result = await modalSwal.fire({
+          title: "Documento duplicado",
+          text: `Um documento com o nome "${file.name}" já existe nesta base de conhecimento. Deseja enviar assim mesmo como um novo documento?`,
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonText: "Enviar assim mesmo",
+          cancelButtonText: "Cancelar",
+        });
+        if (!result.isConfirmed) {
           continue;
         }
       }
@@ -120,15 +126,25 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
   };
 
   const handleDelete = async (doc: DocumentItem) => {
-    if (!confirm(t("knowledge.removeConfirm", { name: doc.name }))) return;
+    setActiveMenuDocId(null);
+    const result = await modalSwal.fire({
+      title: "Excluir documento?",
+      text: `Tem certeza de que deseja remover "${doc.name}" da base de conhecimento?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      confirmButtonText: "Sim, excluir",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
       await api.deleteDocument(assistant.slug, doc.id);
       setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
       showToast(`Document "${doc.name}" deleted.`);
     } catch (err: any) {
       showToast(`Delete failed: ${err.message}`);
-    } finally {
-      setActiveMenuDocId(null);
     }
   };
 

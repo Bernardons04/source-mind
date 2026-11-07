@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useApp } from "@/lib/context";
 import { api, Assistant, Chat } from "@/lib/api";
+import { modalSwal } from "@/lib/swal";
 import { CreateAssistantModal } from "./CreateAssistantModal";
 import {
   ChevronDown,
@@ -19,6 +20,9 @@ import {
   Sun,
   Moon,
   X,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -37,6 +41,18 @@ export function Sidebar({ currentAssistant, activeView = "assistants" }: Sidebar
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isAssistantMenuOpen, setIsAssistantMenuOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [openChatMenu, setOpenChatMenu] = useState<{ id: string; top: number; right: number } | null>(null);
+
+  // Close chat dropdown on window click / scroll
+  useEffect(() => {
+    const handleGlobalClick = () => setOpenChatMenu(null);
+    window.addEventListener("click", handleGlobalClick);
+    window.addEventListener("scroll", handleGlobalClick, true);
+    return () => {
+      window.removeEventListener("click", handleGlobalClick);
+      window.removeEventListener("scroll", handleGlobalClick, true);
+    };
+  }, []);
 
   // Load assistants for picker
   useEffect(() => {
@@ -209,7 +225,7 @@ export function Sidebar({ currentAssistant, activeView = "assistants" }: Sidebar
               </Link>
               <Link
                 href={`/assistants/${currentAssistant.slug}/chat`}
-                className={`nav-item ${activeView === "chat" ? "active" : ""}`}
+                className={`nav-item ${activeView === "chat" && pathname === `/assistants/${currentAssistant.slug}/chat` ? "active" : ""}`}
                 id="navNewChat"
               >
                 <span className="nav-icon"><MessageSquarePlus size={15} strokeWidth={2} /></span>
@@ -245,15 +261,119 @@ export function Sidebar({ currentAssistant, activeView = "assistants" }: Sidebar
                 ) : (
                   chats.map((c) => {
                     const isSelected = pathname === `/assistants/${currentAssistant.slug}/chat/${c.id}`;
+                    const isMenuOpen = openChatMenu?.id === c.id;
+
+                    const handleRename = async () => {
+                      setOpenChatMenu(null);
+                      const { value: newTitle } = await modalSwal.fire({
+                        title: t("sidebarActions.renameTitle"),
+                        input: "text",
+                        inputValue: c.title,
+                        inputPlaceholder: t("sidebarActions.renamePlaceholder"),
+                        showCancelButton: true,
+                        confirmButtonText: t("sidebarActions.renameSave"),
+                        cancelButtonText: t("sidebarActions.renameCancel"),
+                        inputValidator: (val) => {
+                          if (!val || !val.trim()) {
+                            return t("sidebarActions.renameValidation");
+                          }
+                          return null;
+                        },
+                      });
+
+                      if (!newTitle?.trim() || newTitle.trim() === c.title) return;
+                      try {
+                        await api.updateChat(currentAssistant.slug, c.id, { title: newTitle.trim() });
+                        setChats((prev) =>
+                          prev.map((ch) => (ch.id === c.id ? { ...ch, title: newTitle.trim() } : ch))
+                        );
+                      } catch {
+                        // silently fail — user stays in place
+                      }
+                    };
+
+                    const handleDelete = async () => {
+                      setOpenChatMenu(null);
+                      const result = await modalSwal.fire({
+                        title: t("sidebarActions.deleteTitle"),
+                        text: t("sidebarActions.deleteText", { title: c.title }),
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#dc2626",
+                        confirmButtonText: t("sidebarActions.deleteConfirm"),
+                        cancelButtonText: t("sidebarActions.deleteCancel"),
+                      });
+
+                      if (!result.isConfirmed) return;
+
+                      try {
+                        await api.deleteChat(currentAssistant.slug, c.id);
+                        setChats((prev) => prev.filter((ch) => ch.id !== c.id));
+                        if (isSelected) {
+                          router.push(`/assistants/${currentAssistant.slug}/chat`);
+                        }
+                      } catch {
+                        // silently fail
+                      }
+                    };
+
                     return (
-                      <Link
-                        key={c.id}
-                        href={`/assistants/${currentAssistant.slug}/chat/${c.id}`}
-                        className={`chat-item ${isSelected ? "selected" : ""}`}
-                        title={c.title}
-                      >
-                        {c.title}
-                      </Link>
+                      <div key={c.id} className="chat-item-row">
+                        <Link
+                          href={`/assistants/${currentAssistant.slug}/chat/${c.id}`}
+                          className={`chat-item ${isSelected ? "selected" : ""}`}
+                          title={c.title}
+                        >
+                          {c.title}
+                        </Link>
+
+                        <button
+                          type="button"
+                          className="chat-menu-btn"
+                          aria-label="Chat options"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (isMenuOpen) {
+                              setOpenChatMenu(null);
+                            } else {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              setOpenChatMenu({
+                                id: c.id,
+                                top: rect.bottom + 4,
+                                right: window.innerWidth - rect.right,
+                              });
+                            }
+                          }}
+                        >
+                          <MoreHorizontal size={14} strokeWidth={2} />
+                        </button>
+
+                        {isMenuOpen && (
+                          <div
+                            className="chat-menu-floating"
+                            style={{
+                              position: "fixed",
+                              top: `${openChatMenu.top}px`,
+                              right: `${openChatMenu.right}px`,
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <button type="button" className="chat-menu-item" onClick={handleRename}>
+                              <Pencil size={12} strokeWidth={2} />
+                              {t("sidebarActions.renameBtn")}
+                            </button>
+                            <button
+                              type="button"
+                              className="chat-menu-item chat-menu-item-danger"
+                              onClick={handleDelete}
+                            >
+                              <Trash2 size={12} strokeWidth={2} />
+                              {t("sidebarActions.deleteBtn")}
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     );
                   })
                 )}
