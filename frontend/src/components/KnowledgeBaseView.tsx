@@ -23,7 +23,6 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
   const { t, showToast } = useApp();
   const [documents, setDocuments] = useState<DocumentItem[]>(initialDocuments);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState<"documents" | "processing" | "settings">("documents");
   const [isUploading, setIsUploading] = useState(false);
   const [deletingDocIds, setDeletingDocIds] = useState<Set<string>>(new Set());
 
@@ -194,52 +193,25 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
         </button>
       </div>
 
-      {/* Tabs */}
-      <div className="view-tabs">
-        <button
-          type="button"
-          className={`view-tab ${activeTab === "documents" ? "active" : ""}`}
-          onClick={() => setActiveTab("documents")}
-        >
-          {t("knowledge.tabDocuments")}
-        </button>
-        <button
-          type="button"
-          className={`view-tab ${activeTab === "processing" ? "active" : ""}`}
-          onClick={() => setActiveTab("processing")}
-        >
-          {t("knowledge.tabProcessing")}
-        </button>
-        <button
-          type="button"
-          className={`view-tab ${activeTab === "settings" ? "active" : ""}`}
-          onClick={() => setActiveTab("settings")}
-        >
-          {t("knowledge.tabSettings")}
-        </button>
+      {/* Mini Stats */}
+      <div className="stats-row">
+        <div className="mini-stat">
+          <span>{t("knowledge.totalDocs")}</span>
+          <strong id="docCount">{documents.length}</strong>
+        </div>
+        <div className="mini-stat">
+          <span>{t("knowledge.indexedDocs")}</span>
+          <strong>{indexedCount}</strong>
+        </div>
+        <div className="mini-stat">
+          <span>{t("knowledge.status")}</span>
+          <strong style={{ fontSize: "16px", color: "var(--accent)", marginTop: "10px" }}>
+            {kbStatusText}
+          </strong>
+        </div>
       </div>
 
-      {activeTab === "documents" && (
-        <>
-          {/* Mini Stats */}
-          <div className="stats-row">
-            <div className="mini-stat">
-              <span>{t("knowledge.totalDocs")}</span>
-              <strong id="docCount">{documents.length}</strong>
-            </div>
-            <div className="mini-stat">
-              <span>{t("knowledge.indexedDocs")}</span>
-              <strong>{indexedCount}</strong>
-            </div>
-            <div className="mini-stat">
-              <span>{t("knowledge.status")}</span>
-              <strong style={{ fontSize: "16px", color: "var(--accent)", marginTop: "10px" }}>
-                {kbStatusText}
-              </strong>
-            </div>
-          </div>
-
-          {/* Upload Zone */}
+      {/* Upload Zone */}
           <div className="upload-zone">
             <div className="upload-symbol">
               <Upload size={22} strokeWidth={1.5} />
@@ -350,46 +322,6 @@ export function KnowledgeBaseView({ assistant, initialDocuments }: KnowledgeBase
               )}
             </div>
           </div>
-        </>
-      )}
-
-      {activeTab === "processing" && (
-        <div className="panel" style={{ padding: "24px" }}>
-          <strong style={{ fontSize: "14px" }}>Active Ingestion Pipeline</strong>
-          <p style={{ color: "var(--muted)", fontSize: "12px", marginTop: "6px" }}>
-            Real-time status of document text parsing, chunk segmentation, and vector embedding indexing.
-          </p>
-          <div style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
-            {documents.map((d) => (
-              <div
-                key={d.id}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  padding: "10px 14px",
-                  background: "var(--panel-2)",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                }}
-              >
-                <span>{d.name}</span>
-                <span style={{ color: d.processing_status === "indexed" ? "var(--accent)" : "#fbbf24" }}>
-                  {d.processing_status.toUpperCase()}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {activeTab === "settings" && (
-        <div className="panel" style={{ padding: "24px" }}>
-          <strong style={{ fontSize: "14px" }}>Knowledge Retrieval Settings</strong>
-          <p style={{ color: "var(--muted)", fontSize: "12px", marginTop: "6px" }}>
-            Configured chunk size: 500 words · Chunk overlap: 80 words · Hybrid RRF Fusion: pgvector Cosine + PostgreSQL Full-Text Search.
-          </p>
-        </div>
-      )}
     </>
   );
 }
