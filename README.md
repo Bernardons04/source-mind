@@ -1,4 +1,4 @@
-# SourceMind — Enterprise AI Knowledge Platform
+﻿# SourceMind — Enterprise AI Knowledge Platform
 
 SourceMind is an AI-powered knowledge platform designed for businesses to create private, specialized AI assistants backed by organizational documentation. The system allows companies to ingest internal manuals, policies, and operating procedures, enabling assistants to answer questions using grounded document retrieval, contextual reasoning, and traceable citations. When internal documentation does not provide sufficient evidence to answer an organization-specific question, SourceMind communicates what could not be found rather than generating unsupported claims.
 
@@ -98,58 +98,51 @@ Modern companies maintain valuable institutional knowledge distributed across PD
 flowchart TD
     User([User / Browser])
 
-    subgraph Frontend ["Frontend (Next.js 14 App Router)"]
-        UI["React Server & Client Components"]
-        I18N["i18n (EN / PT / ES) & Theme Engine"]
-        SupabaseClient["Supabase Auth Client (OAuth Google)"]
+    subgraph Frontend ["Frontend"]
+        NextJS["Next.js Application"]
     end
 
-    subgraph Backend ["Backend (FastAPI & Python 3.13)"]
-        AuthLayer["JWT Verification (Supabase Public JWKS)"]
-        API["FastAPI REST Endpoints\n(/assistants, /documents, /chats, /preferences)"]
-        AgentLoop["Agent Workflow & Tool Loop (Multi-Turn RAG)"]
-        HybridRetriever["Hybrid Retriever (Semantic + Lexical + RRF)"]
-        CryptoService["Fernet Symmetric Encryption / Decryption"]
+    subgraph Auth ["Authentication"]
+        SupabaseAuth["Supabase Auth"]
     end
 
-    subgraph AsyncPipeline ["Asynchronous Processing Subsystem"]
-        Outbox["document_outbox Table (PostgreSQL)"]
-        Dispatcher["Outbox Dispatcher (FOR UPDATE SKIP LOCKED)"]
-        RabbitMQ[("RabbitMQ Broker (AMQP 5672)")]
-        Worker["Dramatiq Worker (Document Ingestion Engine)"]
-        Reconciler["Reconciler (Recovers Abandoned Uploads)"]
+    subgraph Backend ["Backend API"]
+        FastAPI["FastAPI Server"]
     end
 
-    subgraph DataStorage ["Persistence & External Services"]
-        SupabaseDB[("PostgreSQL with pgvector\n(Direct asyncpg connection)")]
-        Storage[("Supabase Private Storage Bucket")]
-        OpenRouter["OpenRouter API Gateway\n(Embeddings & Chat Completions)"]
+    subgraph MessageBroker ["Message Broker"]
+        RabbitMQ[("RabbitMQ")]
     end
 
-    User -->|Interacts| UI
-    UI -->|Google OAuth Login| SupabaseClient
-    UI -->|API Requests + Bearer JWT| AuthLayer
-    AuthLayer --> API
-    API -->|Async ORM / Direct Connection| SupabaseDB
-    API -->|Upload File Binary| Storage
-    API -->|Write Outbox Record| Outbox
-    API --> AgentLoop
+    subgraph Background ["Background Processing"]
+        Dispatcher["Outbox Dispatcher"]
+        Worker["Dramatiq Worker"]
+    end
 
-    Outbox -->|Poll & Claim Batch| Dispatcher
-    Dispatcher -->|Publisher Confirms| RabbitMQ
-    RabbitMQ -->|Deliver Ingestion Job| Worker
-    Worker -->|Session Advisory Lock| SupabaseDB
-    Worker -->|Download Binary File| Storage
-    Worker -->|Generate Vector Embeddings| OpenRouter
-    Worker -->|Insert Chunks & Vectors| SupabaseDB
-    Reconciler -.->|Audit Stuck Uploads| SupabaseDB
-    Reconciler -.->|Compensatory Deletion| Storage
+    subgraph StorageEngine ["Storage & Persistence"]
+        Postgres[("PostgreSQL + pgvector")]
+        Storage[("Supabase Storage")]
+    end
 
-    AgentLoop -->|Execute Tool: search_knowledge_base| HybridRetriever
-    HybridRetriever -->|pgvector Cosine Search| SupabaseDB
-    HybridRetriever -->|PostgreSQL Full-Text Search| SupabaseDB
-    HybridRetriever -->|Generate Query Embedding| OpenRouter
-    AgentLoop -->|Structured Answer Synthesis| OpenRouter
+    subgraph AI ["AI Gateway"]
+        OpenRouter["OpenRouter API"]
+    end
+
+    User <-->|HTTP / UI| NextJS
+    NextJS <-->|Sign-in / Token| SupabaseAuth
+    NextJS <-->|REST API + Bearer JWT| FastAPI
+
+    FastAPI <-->|Read / Write| Postgres
+    FastAPI -->|Upload Document| Storage
+    FastAPI <-->|Chat & Embeddings| OpenRouter
+
+    Dispatcher -->|Poll Outbox| Postgres
+    Dispatcher -->|Publish Task| RabbitMQ
+    RabbitMQ -->|Deliver Task| Worker
+
+    Worker -->|Fetch Document| Storage
+    Worker -->|Generate Embeddings| OpenRouter
+    Worker -->|Save Chunks & Vectors| Postgres
 ```
 
 ---
@@ -160,35 +153,28 @@ flowchart TD
 sequenceDiagram
     autonumber
     actor User
-    participant Frontend as Next.js Client
-    participant API as FastAPI Backend
+    participant Frontend as Next.js
+    participant API as FastAPI
     participant Storage as Supabase Storage
-    participant DB as PostgreSQL (Outbox)
-    participant Dispatcher as Outbox Dispatcher
-    participant RMQ as RabbitMQ
+    participant DB as PostgreSQL
+    participant Dispatcher as Dispatcher
+    participant Broker as RabbitMQ
     participant Worker as Dramatiq Worker
-    participant AI as OpenRouter API
 
-    User->>Frontend: Upload Document (PDF / DOCX / TXT)
-    Frontend->>API: POST /api/assistants/:slug/documents
-    API->>DB: Pre-register Document (upload_status='uploading')
-    API->>Storage: Upload raw binary to private bucket
-    API->>DB: Update (upload_status='uploaded') + INSERT document_outbox
-    API-->>Frontend: 202 Accepted (Document metadata)
+    User->>Frontend: Upload Document
+    Frontend->>API: Upload File
+    API->>Storage: Store File Binary
+    API->>DB: Save Document & Outbox Event
+    API-->>Frontend: Accepted (Processing)
 
-    loop Outbox Dispatching
-        Dispatcher->>DB: SELECT * FROM document_outbox FOR UPDATE SKIP LOCKED
-        Dispatcher->>RMQ: Publish message with Publisher Confirms (delivery_mode=2)
-        Dispatcher->>DB: Mark outbox event as 'dispatched'
+    loop Asynchronous Ingestion
+        Dispatcher->>DB: Read Pending Events
+        Dispatcher->>Broker: Dispatch Task
+        Broker->>Worker: Execute Ingestion Task
+        Worker->>Storage: Download Document
+        Worker->>Worker: Parse & Chunk Text
+        Worker->>DB: Store Chunks & Vector Embeddings
     end
-
-    RMQ->>Worker: Deliver message to process_document_task
-    Worker->>DB: Acquire 64-bit session advisory lock
-    Worker->>Storage: Download raw document bytes
-    Worker->>Worker: Extract text, normalize layout & chunk sections
-    Worker->>AI: Generate vector embeddings
-    Worker->>DB: INSERT document_chunks & UPDATE document (processing_status='indexed')
-    Worker->>DB: Release session advisory lock
 ```
 
 ---
@@ -196,34 +182,13 @@ sequenceDiagram
 ### Agentic RAG & Hybrid Retrieval Flow
 
 ```mermaid
-flowchart TD
-    Start([User sends chat message]) --> LoadHistory[Load conversation history & assistant instructions]
-    LoadHistory --> PrepPrompt[Build dynamic prompt with temporal and document context]
-    PrepPrompt --> LLMCall[LLM Call with Tool Definition: search_knowledge_base]
-
-    LLMCall --> Decision{Did LLM decide to call retrieval tool?}
-
-    Decision -- Yes --> ToolExec[Execute search_knowledge_base]
-    ToolExec --> EmbedQ[Embed Query via OpenRouter]
-    ToolExec --> ParseLex[Generate Portuguese tsquery]
-
-    subgraph HybridSearchFlow [Hybrid Search Subsystem]
-        direction TB
-        EmbedQ --> SemSearch[Semantic Search: pgvector cosine distance]
-        ParseLex --> LexSearch[Lexical Search: tsvector @@ tsquery]
-        SemSearch & LexSearch --> RRF[Reciprocal Rank Fusion RRF Scoring]
-    end
-
-    RRF --> FeedToolResult[Append tool result payload to message history]
-    FeedToolResult --> IterCheck{More iterations needed within limit?}
-    IterCheck -- Yes --> LLMCall
-    IterCheck -- Limit reached / finished --> Synthesis
-
-    Decision -- No --> Synthesis[Phase 2: Strict JSON Schema Synthesis]
-    Synthesis --> OutputValidation{Pydantic Schema Validation Passed?}
-    OutputValidation -- Yes --> Persist[Persist Assistant Message, Citations & Execution Events]
-    OutputValidation -- No --> RaiseErr[Raise Synthesis Validation Error]
-    Persist --> End([Return assistant response with available citations and execution trace])
+flowchart LR
+    Question([User Question]) --> Agent["Backend / Agent"]
+    Agent <-->|Search Query & Retrieved Passages| Retrieval["Information Retrieval\n(Semantic + Lexical)"]
+    Retrieval --> Context["Relevant Context"]
+    Context --> LLM["LLM (OpenRouter)"]
+    Agent --> LLM
+    LLM --> Response["Answer with Source References"]
 ```
 
 ---
