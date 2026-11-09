@@ -2,6 +2,18 @@
 
 SourceMind is an AI-powered knowledge platform designed for businesses to create private, specialized AI assistants backed by organizational documentation. The system allows companies to ingest internal manuals, policies, and operating procedures, enabling assistants to answer questions using grounded document retrieval, contextual reasoning, and traceable citations. When internal documentation does not provide sufficient evidence to answer an organization-specific question, SourceMind communicates what could not be found rather than generating unsupported claims.
 
+<p align="center">
+  <a href="https://sourcemind-app.vercel.app/">
+    <strong>🚀 Live Demo — Try SourceMind</strong>
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://sourcemind-app.vercel.app/">
+    <img src="frontend/public/images/landing/hero-landing-page.png" alt="SourceMind Landing Page" width="100%" />
+  </a>
+</p>
+
 ---
 
 ## Table of Contents
