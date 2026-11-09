@@ -52,25 +52,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleDevBypass = () => {
-    // Generate a valid mock JWT payload for seamless local testing
-    // with sub: 00000000-0000-0000-0000-000000000001
-    const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
-    const payload = btoa(
-      JSON.stringify({
-        sub: "00000000-0000-0000-0000-000000000001",
-        email: "demo.user@manualmind.internal",
-        role: "authenticated",
-        aud: "authenticated",
-        exp: Math.floor(Date.now() / 1000) + 86400 * 30,
-      })
-    );
-    const mockToken = `${header}.${payload}.devsignature`;
-    localStorage.setItem("dev_auth_token", mockToken);
-    showToast("Dev session activated!");
-    router.push("/assistants");
-  };
-
   return (
     <div
       style={{
@@ -160,18 +141,6 @@ export default function LoginPage() {
           </svg>
           <span>{loading ? t("auth.signingIn") : t("auth.googleButton")}</span>
         </button>
-
-        {/* Development fast-access option */}
-        <div style={{ marginTop: "20px", paddingTop: "18px", borderTop: "1px solid var(--border)" }}>
-          <button
-            type="button"
-            className="quiet-button"
-            onClick={handleDevBypass}
-            style={{ width: "100%", justifyContent: "center", fontSize: "12px" }}
-          >
-            <span>⚡ Enter as Demo / Test Workspace User</span>
-          </button>
-        </div>
 
         <p style={{ color: "var(--muted)", fontSize: "11px", marginTop: "24px" }}>
           {t("auth.tagline")}
