@@ -1,0 +1,22 @@
+# Ignore python cache and build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# Ignore local environment files and secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Ignore local testing and IDE artifacts
+.pytest_cache/
+tests/
+.vscode/
+.idea/
+
